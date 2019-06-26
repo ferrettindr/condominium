@@ -1,0 +1,19 @@
+<component name="libraryTable">
+  <library name="lib2">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/out/production/condominium/lib/jersey-json-1.19.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/out/production/condominium/lib/jersey-servlet-1.19.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/out/production/condominium/lib/jackson-xc-1.9.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/out/production/condominium/lib/jackson-jaxrs-1.9.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/out/production/condominium/lib/jsr311-api-1.1.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/out/production/condominium/lib/jersey-client-1.19.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/out/production/condominium/lib/jackson-mapper-asl-1.9.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/out/production/condominium/lib/jackson-core-asl-1.9.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/out/production/condominium/lib/jersey-server-1.19.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/out/production/condominium/lib/jersey-core-1.19.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/out/production/condominium/lib/jettison-1.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

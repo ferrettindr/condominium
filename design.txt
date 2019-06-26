@@ -1,0 +1,14 @@
+service provided by the administrator server:
+    CONDO LIST
+    these servicies are synchronized on the condo list
+    - insertion of a new house in the condo:
+        - if not already present it is added to the condo and it is returned the condo list
+        - if already present an error is returned
+    - removal of a house:
+        - remove the house from the condo list
+    - condo list is returned to the administrator
+
+    STATS
+    Reduce the conflict between the services to a minimum
+    - condo sends stats for the houses and updates them
+    - administrator reads stats or aggregates them
