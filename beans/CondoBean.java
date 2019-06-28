@@ -14,11 +14,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class CondoBean {
 
     @XmlElement(name="house")
-    private Hashtable<Integer, HouseBean> houseList;
+    private Hashtable<Integer, HouseBean> condoTable;
     private static CondoBean instance;
 
+    //TODO use here rwlock as well isntead of synchronized
     public CondoBean() {
-        houseList = new Hashtable<Integer, HouseBean>();
+        condoTable = new Hashtable<Integer, HouseBean>();
     }
 
     //singleton
@@ -28,24 +29,27 @@ public class CondoBean {
         return instance;
     }
 
-    public synchronized List<HouseBean> getHouseList() {
-        return new ArrayList<HouseBean>(houseList.values());
+    public synchronized List<HouseBean> getCondoTable() {
+        return new ArrayList<HouseBean>(condoTable.values());
     }
 
-    //synchronized or removed?
-    public void setHouseList(Hashtable<Integer, HouseBean> houseList) {
-        this.houseList = houseList;
+    //TODO synchronized or removed?
+    public void setCondoTable(Hashtable<Integer, HouseBean> condoTable) {
+        this.condoTable = condoTable;
     }
 
     public synchronized boolean addHouse(HouseBean h){
-        if (houseList.containsKey(h.getId()))
+        if (condoTable.containsKey(h.getId()))
            return false;
-        houseList.put(h.getId(), h);
+        condoTable.put(h.getId(), h);
         return true;
     }
 
-    public synchronized void removeHouse(int id) {
-        houseList.remove(id);
+    public synchronized boolean removeHouse(int id) {
+        if (null == condoTable.remove(id))
+            return false;
+        else
+            return true;
     }
 
 
