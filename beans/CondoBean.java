@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType (XmlAccessType.FIELD)
 public class CondoBean {
 
-    @XmlElement(name="house")
+    @XmlElement(name="condo")
     private Hashtable<Integer, HouseBean> condoTable;
     private static CondoBean instance;
 

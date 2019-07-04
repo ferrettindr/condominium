@@ -43,10 +43,9 @@ public class AdministratorServer {
     }
 
     //remove a house and its stats from the condo
-    @Path("house/remove")
-    @POST
-    @Consumes({"application/json"})
-    public Response removeHouse(HouseBean h){
+    @Path("house/remove/{id}")
+    @GET
+    public Response removeHouse(@PathParam("id") int id){
         StatisticsBean stat = StatisticsBean.getInstance();
         //lock to avoid race condition if someone is reading stats
         //no-deadlock because it's the same thread
@@ -54,10 +53,10 @@ public class AdministratorServer {
 
         //if trying to remove a house not present abort
         Response result = Response.ok().build();
-        if (CondoBean.getInstance().removeHouse(h.getId())) {
+        if (!CondoBean.getInstance().removeHouse(id)) {
             result = Response.status(Response.Status.CONFLICT).build();
         }
-        stat.removeHouseStats(h.getId());
+        stat.removeHouseStats(id);
 
         stat.rwLock.endWrite();
 
@@ -72,40 +71,66 @@ public class AdministratorServer {
         return Response.ok().build();
     }
 
-    @Path("stats/get")
-    @POST
+    @Path("stats/{n}")
+    @GET
     @Produces({"application/json"})
-    public Response getCondoStatistics(int n) {
+    public Response getCondoStatistics(@PathParam("n") int n) {
         List<StatBean> stats = StatisticsBean.getInstance().getCondoStat(n);
         return Response.ok(stats).build();
     }
 
-    @Path("stats/get/house")
-    @POST
+    @Path("stats/house/{id}/{n}")
+    @GET
     @Produces({"application/json"})
-    public Response getHouseStatistics(int id, int n) {
+    public Response getHouseStatistics(@PathParam("id") int id,@PathParam("n") int n) {
         List<StatBean> stats = StatisticsBean.getInstance().getHouseStat(id, n);
         return Response.ok(stats).build();
     }
 
-    @Path("stats/get/analytics")
-    @POST
+    @Path("stats/analytics/{n}")
+    @GET
     @Produces({"application/json"})
-    public Response getCondoAnalytics(int n) {
+    public Response getCondoAnalytics(@PathParam("n") int n) {
         List<StatBean> stats = StatisticsBean.getInstance().getCondoStat(n);
-        //TODO calculate mean and std dev
-        return Response.ok(stats).build();
+        double mean, std_dev;
+        double res[] = new double[2];
+        mean = sumStat(stats) / n;
+        std_dev = Math.sqrt((sumSquareStat(stats)/n) - Math.pow(mean, 2));
+        res[0] = mean;
+        res[1] = std_dev;
+        return Response.ok(res).build();
     }
 
-    @Path("stats/get/house/analytics")
-    @POST
+    @Path("stats/analytics/house/{id}/{n}")
+    @GET
+    @Consumes({"application/json"})
     @Produces({"application/json"})
-    public Response getHouseAnalytics(int id, int n) {
+    public Response getHouseAnalytics(@PathParam("id") int id,@PathParam("n") int n) {
         List<StatBean> stats = StatisticsBean.getInstance().getHouseStat(id, n);
-        //TODO calculate mean and std dev
-        return Response.ok(stats).build();
+        double mean, std_dev;
+        double res[] = new double[2];
+        mean = sumStat(stats) / n;
+        std_dev = Math.sqrt((sumSquareStat(stats)/n) - Math.pow(mean, 2));
+        res[0] = mean;
+        res[1] = std_dev;
+        return Response.ok(res).build();
     }
 
+
+    private double sumStat(Iterable<StatBean> stats) {
+        double sum = 0;
+        for (StatBean stat: stats)
+            sum += stat.getConsumption();
+        return sum;
+    }
+
+
+    private double sumSquareStat(Iterable<StatBean> stats) {
+        double sum = 0;
+        for (StatBean stat: stats)
+            sum +=  Math.pow(stat.getConsumption(), 2);
+        return sum;
+    }
 
     /*
     //permette di prelevare con un determinato nome

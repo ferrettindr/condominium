@@ -89,9 +89,9 @@ public class StatisticsBean {
     //return the last n elements of list stats (shallow copy)
     private List<StatBean> getLastElements(int n, ArrayList<StatBean> stats) {
         ArrayList<StatBean> nStat = new ArrayList<>();
-        int start = condoStats.size() > n ? condoStats.size() - n - 1 : 0;
-        for (int i = start; i < condoStats.size(); i++)
-            nStat.add(condoStats.get(i));
+        int start = stats.size() > n ? stats.size() - n - 1 : 0;
+        for (int i = start; i < stats.size(); i++)
+            nStat.add(stats.get(i));
         return nStat;
     }
 
