@@ -12,6 +12,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType (XmlAccessType.FIELD)
 public class StatisticsBean {
 
+    //server data structure for saving stats of all houses
+
     @XmlElement(name="houseStat")
     private Hashtable<Integer, ArrayList<StatBean>> statsTable;
     @XmlElement(name="condoStat")
@@ -59,7 +61,7 @@ public class StatisticsBean {
         }
     }
 
-    //return the last n (or less if not available) stats associated with the id of the house
+    //return a copy the last n (or less if not available) stats associated with the id of the house
     public List<StatBean> getHouseStat(int id, int n) {
         rwLock.beginRead();
 
@@ -74,7 +76,7 @@ public class StatisticsBean {
         return result;
     }
 
-    //return the last n (or less if not available) condo stat
+    //return a copy of the last n (or less if not available) condo stat
     public List<StatBean> getCondoStat(int n) {
         rwLock.beginRead();
 
@@ -95,7 +97,7 @@ public class StatisticsBean {
         return nStat;
     }
 
-    //remove all the stat and the house from the table
+    //remove all the stats of the house and the house from the table
     public boolean removeHouseStats(int id) {
         rwLock.beginWrite();
 

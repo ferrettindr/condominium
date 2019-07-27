@@ -10,6 +10,7 @@ public class StatPkgBean {
     private StatBean condoStat;
 
     public StatPkgBean() {
+        houseStat = new Hashtable<>();
     }
 
     public Hashtable<Integer, StatBean> getHouseStat() {

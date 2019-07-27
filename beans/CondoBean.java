@@ -3,6 +3,7 @@ package beans;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import util.RWLock;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -16,10 +17,11 @@ public class CondoBean {
     @XmlElement(name="condo")
     private Hashtable<Integer, HouseBean> condoTable;
     private static CondoBean instance;
+    private RWLock rwLock;
 
-    //TODO use here rwlock as well isntead of synchronized
     public CondoBean() {
         condoTable = new Hashtable<Integer, HouseBean>();
+        rwLock = new RWLock();
     }
 
     //singleton
@@ -29,27 +31,62 @@ public class CondoBean {
         return instance;
     }
 
-    public synchronized List<HouseBean> getCondoTable() {
-        return new ArrayList<HouseBean>(condoTable.values());
+    public List<HouseBean> getCondoTable() {
+        rwLock.beginRead();
+
+        ArrayList<HouseBean> result = (ArrayList<HouseBean>) condoTable.values();
+
+        rwLock.endRead();
+
+        return result;
+    }
+
+    public HouseBean getHouse(int id) {
+        rwLock.beginRead();
+
+        HouseBean result = null;
+        result = condoTable.get(id);
+
+        rwLock.endRead();
+
+        return result;
     }
 
     //TODO synchronized or removed?
-    public void setCondoTable(Hashtable<Integer, HouseBean> condoTable) {
-        this.condoTable = condoTable;
-    }
+    //public void setCondoTable(Hashtable<Integer, HouseBean> condoTable) {
+    //    this.condoTable = condoTable;
+    //}
 
-    public synchronized boolean addHouse(HouseBean h){
+    //add a house to the condo if not already present
+    public boolean addHouse(HouseBean h){
+        rwLock.beginWrite();
+
+        boolean result = false;
         if (condoTable.containsKey(h.getId()))
-           return false;
-        condoTable.put(h.getId(), h);
-        return true;
+           result = false;
+        else {
+            condoTable.put(h.getId(), h);
+            result = true;
+        }
+
+        rwLock.endWrite();
+
+        return result;
     }
 
-    public synchronized boolean removeHouse(int id) {
+    //remove a house from the condo if present
+    public boolean removeHouse(int id) {
+        rwLock.beginWrite();
+
+        boolean result = false;
         if (null == condoTable.remove(id))
-            return false;
+            result = false;
         else
-            return true;
+            result = true;
+
+        rwLock.endWrite();
+
+        return result;
     }
 
 

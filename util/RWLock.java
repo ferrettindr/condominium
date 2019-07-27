@@ -2,7 +2,7 @@ package util;
 
 public class RWLock {
 
-    //lock for concurrent reads and exclusive write
+    //lock for concurrent reads and exclusive writes
     private boolean writeLocked;
     private int readingThreads;
     private Thread lockedBy;
