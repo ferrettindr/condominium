@@ -12,3 +12,16 @@ service provided by the administrator server:
     Reduce the conflict between the services to a minimum
     - condo sends stats for the houses and updates them
     - administrator reads stats or aggregates them
+
+    resolved conflicts generated from two houses entering or leaving at the same time.
+
+    Understand how to make a mesh network works. Election and mutual exclusion algorithms. Message handling by the houses
+    The house needs to have multiple threads that accomplish different tasks:
+        - read user input from command line to perform boost requests or removal from the condo requests
+        - calculate the local measurements usage with sliding window
+        - send usage to the elected node
+        - recieve messages and start a thread with the correct response:
+            - adjust topology: ack mechanism when a new node comes in or a node leaves.
+            - mutual exclusion: save a queue of boost requests (richard and awart)
+            - election: higher node elected (watch mechanism on slides)
+            - if representative: receive usage and compute condo stat and send it to the server

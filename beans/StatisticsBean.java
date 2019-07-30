@@ -18,10 +18,10 @@ public class StatisticsBean {
     private Hashtable<Integer, ArrayList<StatBean>> statsTable;
     @XmlElement(name="condoStat")
     private ArrayList<StatBean> condoStats;
-    private static StatisticsBean instance;
+    private static StatisticsBean instance = null;
     public RWLock rwLock;
 
-    public StatisticsBean() {
+    private StatisticsBean() {
         statsTable = new Hashtable<Integer, ArrayList<StatBean>>();
         condoStats = new ArrayList<StatBean>();
         rwLock = new RWLock();

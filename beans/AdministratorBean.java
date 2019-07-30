@@ -29,4 +29,9 @@ public class AdministratorBean {
         this.port = port;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        AdministratorBean adm = (AdministratorBean) o;
+        return ip.equals(adm.getIp()) && port == adm.getPort();
+    }
 }

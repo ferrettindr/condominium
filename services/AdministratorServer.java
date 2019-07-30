@@ -9,12 +9,8 @@ import beans.StatPkgBean;
 import beans.AdministratorBean;
 import util.RWLock;
 import util.Notifier;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -47,12 +43,12 @@ public class AdministratorServer {
             return Response.ok(CondoBean.getInstance()).build();
         }
         else
-            return Response.status(Response.Status.CONFLICT).build();
+            return Response.status(Response.Status.CONFLICT).entity("The chosen ID: " + h.getId() + " is already being used by another house.").build();
     }
 
     //remove a house and its stats from the condo
     @Path("house/remove/{id}")
-    @GET
+    @DELETE
     public Response removeHouse(@PathParam("id") int id){
         StatisticsBean stat = StatisticsBean.getInstance();
         //lock to avoid race condition if someone is using stats
@@ -63,7 +59,7 @@ public class AdministratorServer {
         Response result = Response.ok().build();
         HouseBean h = CondoBean.getInstance().getHouse(id);
         if (!CondoBean.getInstance().removeHouse(id)) {
-            result = Response.status(Response.Status.CONFLICT).build();
+            result = Response.status(Response.Status.CONFLICT).entity("Could not remove the house. There is no house with ID: " +  id).build();
         }
         else {
             stat.removeHouseStats(id);
@@ -76,7 +72,7 @@ public class AdministratorServer {
     }
 
     @Path("stats/add")
-    @POST
+    @PUT
     @Consumes({"application/json"})
     public Response addStatistics(StatPkgBean pkg) {
         StatisticsBean.getInstance().addStatistics(pkg.getHouseStat(), pkg.getCondoStat());
@@ -132,7 +128,7 @@ public class AdministratorServer {
                 spikeNotifier.addObserver(obs);
                 break;
             default:
-                return Response.status(Response.Status.BAD_REQUEST).build();
+                return Response.status(Response.Status.BAD_REQUEST).entity("Wrong subscription type requested.").build();
         }
         return Response.ok().build();
     }
@@ -152,7 +148,7 @@ public class AdministratorServer {
                 spikeNotifier.removeObserver(obs);
                 break;
             default:
-                return Response.status(Response.Status.BAD_REQUEST).build();
+                return Response.status(Response.Status.BAD_REQUEST).entity("Wrong unsubscription type requested.").build();
         }
         return Response.ok().build();
     }

@@ -12,3 +12,5 @@ service provided by the administrator server:
     Reduce the conflict between the services to a minimum
     - condo sends stats for the houses and updates them
     - administrator reads stats or aggregates them
+
+    resolved conflicts generated from two houses entering or leaving at the same time.

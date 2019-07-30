@@ -16,10 +16,10 @@ public class CondoBean {
 
     @XmlElement(name="condo")
     private Hashtable<Integer, HouseBean> condoTable;
-    private static CondoBean instance;
+    private static CondoBean instance = null;
     private RWLock rwLock;
 
-    public CondoBean() {
+    private CondoBean() {
         condoTable = new Hashtable<Integer, HouseBean>();
         rwLock = new RWLock();
     }
