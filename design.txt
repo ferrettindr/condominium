@@ -20,8 +20,31 @@ service provided by the administrator server:
         - read user input from command line to perform boost requests or removal from the condo requests
         - calculate the local measurements usage with sliding window
         - send usage to the elected node
-        - recieve messages and start a thread with the correct response:
+        - receive messages and start a thread with the correct response:
             - adjust topology: ack mechanism when a new node comes in or a node leaves.
             - mutual exclusion: save a queue of boost requests (richard and awart)
             - election: higher node elected (watch mechanism on slides)
             - if representative: receive usage and compute condo stat and send it to the server
+
+    House registers to the condo.
+    Receives the list of other houses.
+    starts message receiver:
+        - receive other stats and compute condo stats when a fresh measurement for each house is available
+          if more recent measurements arrives either update the old one or take the average.
+          if the house is not in the local condo add it
+        - receive a new house insertion and add it to the local condo or tell her you are removing yourself
+        - receive a house removal and act accordingly (may start and election and remove from boost queue)
+        - receive election message and act accordingly
+        - receive boost request and act accordingly (richart and awairt)
+    informs other houses of its presence (wait for ack, leader tells who he is, if no ack remove from local condo)
+    starts smart meter and sends other houses.
+    if it thinks it should be the leader starts an election
+    if wins election sends to the server condo stats when available the full bulk
+    allow from command line to request boost or removal
+    when removed from the server send all nodes in the local condo
+    if removed release boost (remove from queue and send other nodes in queue the removal)
+
+    when a house starts it sends every other houses in the condo (given by the server) a hello.
+    The other houses respond to the hello with a message. The houses adds to her local condo only the houses that responds to the hello.
+    If other messages arrives from a house not in the local condo, that house gets added to the local condo.
+

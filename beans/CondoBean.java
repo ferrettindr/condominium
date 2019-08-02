@@ -3,7 +3,7 @@ package beans;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-import util.RWLock;
+import utility.RWLock;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -16,22 +16,23 @@ public class CondoBean {
 
     @XmlElement(name="condo")
     private Hashtable<Integer, HouseBean> condoTable;
-    private static CondoBean instance = null;
     private RWLock rwLock;
 
-    private CondoBean() {
+    public CondoBean() {
         condoTable = new Hashtable<Integer, HouseBean>();
         rwLock = new RWLock();
     }
 
     //singleton
+    /*
     public synchronized static CondoBean getInstance(){
         if(instance==null)
             instance = new CondoBean();
         return instance;
     }
+    */
 
-    public List<HouseBean> getCondoTable() {
+    public List<HouseBean> getCondoList() {
         rwLock.beginRead();
 
         ArrayList<HouseBean> result = (ArrayList<HouseBean>) condoTable.values();

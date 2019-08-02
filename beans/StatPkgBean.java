@@ -13,7 +13,7 @@ public class StatPkgBean {
         houseStat = new Hashtable<>();
     }
 
-    public Hashtable<Integer, StatBean> getHouseStat() {
+    public Hashtable<Integer, StatBean> getHousesStat() {
         return houseStat;
     }
 

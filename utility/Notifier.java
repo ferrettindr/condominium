@@ -1,7 +1,6 @@
-package util;
+package utility;
 
 import beans.HouseBean;
-import util.RWLock;
 import beans.AdministratorBean;
 
 import java.util.ArrayList;
@@ -44,13 +43,14 @@ public class Notifier {
     }
 
     public void notify(HouseBean h) {
+        ArrayList<AdministratorBean> copy = new ArrayList<>();
         rwLock.beginRead();
-
+        copy.addAll(observers);
+        rwLock.endRead();
         //TODO send msg to observers
         //for (AdministratorBean obs: observers) {
 
         //}
 
-        rwLock.endRead();
     }
 }

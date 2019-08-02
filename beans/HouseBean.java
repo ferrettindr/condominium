@@ -9,6 +9,8 @@ public class HouseBean {
     private String ipAddress;
     private int port;
 
+    //TODO check if constructors are needed
+    /*
     public HouseBean(){}
 
     public HouseBean(int id, String ipAddress, int port) {
@@ -16,6 +18,7 @@ public class HouseBean {
         this.ipAddress = ipAddress;
         this.port = port;
     }
+    */
 
     public String getIpAddress() {
         return ipAddress;

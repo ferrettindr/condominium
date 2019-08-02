@@ -7,13 +7,10 @@ import beans.StatBean;
 import beans.StatisticsBean;
 import beans.StatPkgBean;
 import beans.AdministratorBean;
-import util.RWLock;
-import util.Notifier;
+import utility.Notifier;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 
 @Path("condo")
@@ -22,13 +19,14 @@ public class AdministratorServer {
     Notifier inNotifier = new Notifier(Notifier.PushType.IN);
     Notifier outNotifier = new Notifier(Notifier.PushType.OUT);
     Notifier spikeNotifier = new Notifier(Notifier.PushType.SPIKE);
-
+    CondoBean condo = new CondoBean();
+    StatisticsBean statistics = new StatisticsBean();
     //TODO: carefull if returns condo or the table
     @GET
     @Produces({"application/json"})
     public Response getCondo(){
 
-        return Response.ok(CondoBean.getInstance()).build();
+        return Response.ok(condo.getCondoList()).build();
 
     }
 
@@ -38,9 +36,9 @@ public class AdministratorServer {
     @Consumes({"application/json"})
     @Produces({"application/json"})
     public Response addHouse(HouseBean h){
-        if (CondoBean.getInstance().addHouse(h)) {
+        if (condo.addHouse(h)) {
             inNotifier.notify(h);
-            return Response.ok(CondoBean.getInstance()).build();
+            return Response.ok(condo.getCondoList()).build();
         }
         else
             return Response.status(Response.Status.CONFLICT).entity("The chosen ID: " + h.getId() + " is already being used by another house.").build();
@@ -50,15 +48,15 @@ public class AdministratorServer {
     @Path("house/remove/{id}")
     @DELETE
     public Response removeHouse(@PathParam("id") int id){
-        StatisticsBean stat = StatisticsBean.getInstance();
+        StatisticsBean stat = statistics;
         //lock to avoid race condition if someone is using stats
         //no-deadlock because it's the same thread
         stat.rwLock.beginWrite();
 
         //if trying to remove a house not present abort
         Response result = Response.ok().build();
-        HouseBean h = CondoBean.getInstance().getHouse(id);
-        if (!CondoBean.getInstance().removeHouse(id)) {
+        HouseBean h = condo.getHouse(id);
+        if (!condo.removeHouse(id)) {
             result = Response.status(Response.Status.CONFLICT).entity("Could not remove the house. There is no house with ID: " +  id).build();
         }
         else {
@@ -75,40 +73,44 @@ public class AdministratorServer {
     @PUT
     @Consumes({"application/json"})
     public Response addStatistics(StatPkgBean pkg) {
-        StatisticsBean.getInstance().addStatistics(pkg.getHouseStat(), pkg.getCondoStat());
+        statistics.addStatistics(pkg.getHousesStat(), pkg.getCondoStat());
         return Response.ok().build();
     }
 
+    //TODO handle if there are no stats
     @Path("stats/{n}")
     @GET
     @Produces({"application/json"})
     public Response getCondoStatistics(@PathParam("n") int n) {
-        List<StatBean> stats = StatisticsBean.getInstance().getCondoStat(n);
+        List<StatBean> stats = statistics.getCondoStat(n);
         return Response.ok(stats).build();
     }
 
+    //TODO handle case if a nonexistant id is used or the house doesn't have any stat
     @Path("stats/house/{id}/{n}")
     @GET
     @Produces({"application/json"})
     public Response getHouseStatistics(@PathParam("id") int id,@PathParam("n") int n) {
-        List<StatBean> stats = StatisticsBean.getInstance().getHouseStat(id, n);
+        List<StatBean> stats = statistics.getHouseStat(id, n);
         return Response.ok(stats).build();
     }
 
+    //TODO handle if there are no stats
     @Path("stats/analytics/{n}")
     @GET
     @Produces({"application/json"})
     public Response getCondoAnalytics(@PathParam("n") int n) {
-        List<StatBean> stats = StatisticsBean.getInstance().getCondoStat(n);
+        List<StatBean> stats = statistics.getCondoStat(n);
         return Response.ok(calculateAnalytics(stats, n)).build();
     }
 
+    //TODO handle case if a nonexistant id is used or the house doesn't have any stat
     @Path("stats/analytics/house/{id}/{n}")
     @POST
     @Consumes({"application/json"})
     @Produces({"application/json"})
     public Response getHouseAnalytics(@PathParam("id") int id,@PathParam("n") int n) {
-        List<StatBean> stats = StatisticsBean.getInstance().getHouseStat(id, n);
+        List<StatBean> stats = statistics.getHouseStat(id, n);
         return Response.ok(calculateAnalytics(stats, n)).build();
     }
 

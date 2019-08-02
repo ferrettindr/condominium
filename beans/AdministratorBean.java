@@ -8,11 +8,6 @@ public class AdministratorBean {
     private String ip;
     private int port;
 
-    public AdministratorBean(String ip, int port) {
-        this.ip = ip;
-        this.port = port;
-    }
-
     public String getIp() {
         return ip;
     }
@@ -25,7 +20,7 @@ public class AdministratorBean {
         return port;
     }
 
-    public void getPort(int port) {
+    public void setPort(int port) {
         this.port = port;
     }
 

@@ -8,6 +8,8 @@ public class StatBean {
     private double consumption;
     private int timestamp;
 
+    //TODO check if constructors are needed
+    /*
     public StatBean() {
     }
 
@@ -15,6 +17,7 @@ public class StatBean {
         this.consumption = consumption;
         this.timestamp = timestamp;
     }
+    */
 
     public double getConsumption() {
         return consumption;
