@@ -1,12 +1,8 @@
 package services;
 
 
-import beans.CondoBean;
-import beans.HouseBean;
-import beans.StatBean;
-import beans.StatisticsBean;
-import beans.StatPkgBean;
-import beans.AdministratorBean;
+import beans.*;
+import utility.Condo;
 import utility.Notifier;
 
 import javax.ws.rs.*;
@@ -16,17 +12,17 @@ import java.util.List;
 @Path("condo")
 public class AdministratorServer {
 
+    //TODO change in a singleton class with 3 different lists
     Notifier inNotifier = new Notifier(Notifier.PushType.IN);
     Notifier outNotifier = new Notifier(Notifier.PushType.OUT);
     Notifier spikeNotifier = new Notifier(Notifier.PushType.SPIKE);
-    CondoBean condo = new CondoBean();
-    StatisticsBean statistics = new StatisticsBean();
-    //TODO: carefull if returns condo or the table
+
+
     @GET
     @Produces({"application/json"})
     public Response getCondo(){
 
-        return Response.ok(condo.getCondoList()).build();
+        return Response.ok(Condo.getInstance().getCondoTable()).build();
 
     }
 
@@ -36,9 +32,11 @@ public class AdministratorServer {
     @Consumes({"application/json"})
     @Produces({"application/json"})
     public Response addHouse(HouseBean h){
-        if (condo.addHouse(h)) {
+        if (Condo.getInstance().addHouse(h)) {
             inNotifier.notify(h);
-            return Response.ok(condo.getCondoList()).build();
+            CondoTableBean ctb = new CondoTableBean();
+            ctb.setHouseTable(Condo.getInstance().getCondoTable());
+            return Response.ok(ctb).build();
         }
         else
             return Response.status(Response.Status.CONFLICT).entity("The chosen ID: " + h.getId() + " is already being used by another house.").build();
@@ -48,15 +46,15 @@ public class AdministratorServer {
     @Path("house/remove/{id}")
     @DELETE
     public Response removeHouse(@PathParam("id") int id){
-        StatisticsBean stat = statistics;
+        StatisticsBean stat = StatisticsBean.getInstance();
         //lock to avoid race condition if someone is using stats
         //no-deadlock because it's the same thread
         stat.rwLock.beginWrite();
 
         //if trying to remove a house not present abort
         Response result = Response.ok().build();
-        HouseBean h = condo.getHouse(id);
-        if (!condo.removeHouse(id)) {
+        HouseBean h = Condo.getInstance().getHouse(id);
+        if (!Condo.getInstance().removeHouse(id)) {
             result = Response.status(Response.Status.CONFLICT).entity("Could not remove the house. There is no house with ID: " +  id).build();
         }
         else {
@@ -73,7 +71,7 @@ public class AdministratorServer {
     @PUT
     @Consumes({"application/json"})
     public Response addStatistics(StatPkgBean pkg) {
-        statistics.addStatistics(pkg.getHousesStat(), pkg.getCondoStat());
+        StatisticsBean.getInstance().addStatistics(pkg.getHousesStat(), pkg.getCondoStat());
         return Response.ok().build();
     }
 
@@ -82,7 +80,7 @@ public class AdministratorServer {
     @GET
     @Produces({"application/json"})
     public Response getCondoStatistics(@PathParam("n") int n) {
-        List<StatBean> stats = statistics.getCondoStat(n);
+        List<StatBean> stats = StatisticsBean.getInstance().getCondoStat(n);
         return Response.ok(stats).build();
     }
 
@@ -91,7 +89,7 @@ public class AdministratorServer {
     @GET
     @Produces({"application/json"})
     public Response getHouseStatistics(@PathParam("id") int id,@PathParam("n") int n) {
-        List<StatBean> stats = statistics.getHouseStat(id, n);
+        List<StatBean> stats = StatisticsBean.getInstance().getHouseStat(id, n);
         return Response.ok(stats).build();
     }
 
@@ -100,7 +98,7 @@ public class AdministratorServer {
     @GET
     @Produces({"application/json"})
     public Response getCondoAnalytics(@PathParam("n") int n) {
-        List<StatBean> stats = statistics.getCondoStat(n);
+        List<StatBean> stats = StatisticsBean.getInstance().getCondoStat(n);
         return Response.ok(calculateAnalytics(stats, n)).build();
     }
 
@@ -110,7 +108,7 @@ public class AdministratorServer {
     @Consumes({"application/json"})
     @Produces({"application/json"})
     public Response getHouseAnalytics(@PathParam("id") int id,@PathParam("n") int n) {
-        List<StatBean> stats = statistics.getHouseStat(id, n);
+        List<StatBean> stats = StatisticsBean.getInstance().getHouseStat(id, n);
         return Response.ok(calculateAnalytics(stats, n)).build();
     }
 

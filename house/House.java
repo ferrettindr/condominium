@@ -1,16 +1,16 @@
 package house;
 
-import beans.CondoBean;
+import beans.CondoTableBean;
 import beans.HouseBean;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
+import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
+import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 
-import javax.ws.rs.core.MultivaluedMap;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 
 public class House {
 
@@ -18,20 +18,18 @@ public class House {
     int localPort;
     int serverPort;
     String serverIp;
-    CondoBean localCondo;
     HouseBean houseBean = new HouseBean();
 
     public House(int id, int port, int serverPort, String serverIp) {
         this.localId = id;
         this.localPort = port;
         this.serverPort = serverPort;
-        this. serverIp = serverIp;
-        localCondo = new CondoBean();
+        this.serverIp = serverIp;
         houseBean.setId(localId);
         houseBean.setPort(localPort);
         try {
             houseBean.setIpAddress(InetAddress.getLocalHost().getHostAddress());
-        } catch (UnknownHostException e) {e.printStackTrace();}
+        } catch (UnknownHostException e) {throw new RuntimeException("Unable to get local IP");}
     }
 
     public HouseBean getHouseBean() {
@@ -49,22 +47,24 @@ public class House {
 
         //Insert the house into the condo and get the list of houses from the server
         String webURL = "http://" + serverIp + ":" + serverPort + "/condo/";
-        Client client = Client.create();
-        MultivaluedMap formData = new MultivaluedMapImpl();
-        formData.add("h", house.getHouseBean());
+
+        ClientConfig cc = new DefaultClientConfig();
+        cc.getClasses().add(JacksonJsonProvider.class);
+        Client client = Client.create(cc);
+
         WebResource resource = client.resource(webURL+"house/add/");
-        ClientResponse response = resource.type("application/json").post(ClientResponse.class, formData);
+        ClientResponse response = resource.type("application/json").post(ClientResponse.class, house.getHouseBean());
+        if (response.getStatus() == 409) {
+            throw new RuntimeException("House ID: " + house.getHouseBean().getId() + " already in use pick another one and try again");
+        }
         if (response.getStatus() != 200) {
             throw new RuntimeException("Failed to register to the condo server, aborting. HTTP error: " + response.getStatus());
         }
 
-        ArrayList<HouseBean> housesList = response.getEntity(ArrayList.class);
-
-        for (HouseBean hb: housesList) {
-            System.out.println(hb.toString());
-        }
+        CondoTableBean housesList = response.getEntity(CondoTableBean.class);
 
 
 
     }
 }
+

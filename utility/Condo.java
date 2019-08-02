@@ -1,9 +1,8 @@
-package beans;
+package utility;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.List;
-import utility.RWLock;
+
+import beans.HouseBean;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -12,30 +11,29 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 @XmlAccessorType (XmlAccessType.FIELD)
-public class CondoBean {
+public class Condo {
 
     @XmlElement(name="condo")
     private Hashtable<Integer, HouseBean> condoTable;
+    private static Condo instance = null;
     private RWLock rwLock;
 
-    public CondoBean() {
+    public Condo() {
         condoTable = new Hashtable<Integer, HouseBean>();
         rwLock = new RWLock();
     }
 
     //singleton
-    /*
-    public synchronized static CondoBean getInstance(){
+    public synchronized static Condo getInstance(){
         if(instance==null)
-            instance = new CondoBean();
+            instance = new Condo();
         return instance;
     }
-    */
 
-    public List<HouseBean> getCondoList() {
+    public Hashtable<Integer, HouseBean> getCondoTable() {
         rwLock.beginRead();
 
-        ArrayList<HouseBean> result = (ArrayList<HouseBean>) condoTable.values();
+        Hashtable<Integer, HouseBean> result = new Hashtable(condoTable);
 
         rwLock.endRead();
 
