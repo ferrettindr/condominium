@@ -6,13 +6,18 @@ import java.io.IOException;
 import java.net.Socket;
 
 import beans.HouseBean;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.ObjectWriter;
+//import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jettison.json.JSONException;
 import utility.Condo;
 import utility.Message;
 
 public class MessageHandler implements Runnable {
+
+    protected enum headerTYPE{
+        HELLO,
+        ACK_HELLO,
+        EMPTY;
+    }
 
     Socket socket;
     DataOutputStream output;
@@ -35,7 +40,6 @@ public class MessageHandler implements Runnable {
     @Override
     public void run() {
         Message msg = new Message();
-        msg.setHeader("EMPTY");
         try {
             String stringMsg = input.readUTF();
             System.out.println(stringMsg);
@@ -46,7 +50,7 @@ public class MessageHandler implements Runnable {
         switch (msg.getHeader()) {
             case "EMPTY":
                 break;
-            case "HELLO_ACK":
+            case "ACK_HELLO":
                 try {
                     helloAckResponse(msg);
                 } catch (IOException e) {System.err.println("Cannot respond to hello ack message" + e.getMessage()); e.printStackTrace();}
@@ -63,30 +67,25 @@ public class MessageHandler implements Runnable {
     }
 
     private void helloResponse(Message msg) throws JSONException, IOException {
-        ObjectMapper om = new ObjectMapper();
-        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        HouseBean newHouse = null;
-        String thisHouse = "";
-        newHouse = om.readValue(msg.getContent(), HouseBean.class);
+        HouseBean newHouse = msg.getContent(HouseBean.class);
         Condo.getInstance().addHouse(newHouse);
         System.out.println("Condo table: " + Condo.getInstance().getCondoTable().toString());
 
-        thisHouse = ow.writeValueAsString(houseBean);
         Message helloAck = new Message();
-        helloAck.setHeader("HELLO_ACK");
-        helloAck.setContent(thisHouse);
+        helloAck.setHeader("ACK_HELLO");
+        helloAck.setContent(houseBean);
         System.out.println("about to write response ack");
         Socket rSocket = new Socket(newHouse.getIpAddress(), newHouse.getPort());
         DataOutputStream dos = new DataOutputStream(rSocket.getOutputStream());
         dos.writeUTF(helloAck.toJSONString());
         dos.flush();
-        //dos.close();
+        dos.close();
+        rSocket.close();
         System.out.println("HELLO RESPONOSE by id: " + houseBean.getId());
     }
 
     private void helloAckResponse(Message msg) throws IOException {
-        ObjectMapper om = new ObjectMapper();
-        HouseBean hb = om.readValue(msg.getContent(), HouseBean.class);
+        HouseBean hb = msg.getContent(HouseBean.class);
         Condo.getInstance().addHouse(hb);
         System.out.println("HELLO ACK RESPONSE by id: " + houseBean.getId());
         System.out.println("Condo table: " + Condo.getInstance().getCondoTable().toString());

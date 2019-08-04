@@ -3,21 +3,12 @@
   <component name="ChangeListManager">
     <list default="true" id="67acaa3b-7e8d-4c49-976c-89629bea374b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/beans/CondoTableBean.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/beans/StatisticsBean.java" beforeDir="false" afterPath="$PROJECT_DIR$/utility/Statistics.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/house/House.java" beforeDir="false" afterPath="$PROJECT_DIR$/house/House.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/house/HouseServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/house/HouseServer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/house/MessageHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/house/MessageHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/condominium/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/condominium/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/condominium/beans/CondoBean.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/condominium/beans/CondoTableBean.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/condominium/beans/StatisticsBean.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/condominium/house/House$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/condominium/house/House$1.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/condominium/house/House.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/condominium/house/House.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/condominium/house/HouseServer.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/condominium/house/HouseServer.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/condominium/house/MessageHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/condominium/house/MessageHandler.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/condominium/services/AdministratorServer.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/condominium/services/AdministratorServer.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/condominium/utility/Message.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/condominium/utility/Message.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/AdministratorServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/services/AdministratorServer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utility/Message.java" beforeDir="false" afterPath="$PROJECT_DIR$/utility/Message.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
@@ -59,11 +50,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/house/House.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="102">
-              <caret line="38" column="9" selection-start-line="38" selection-start-column="9" selection-end-line="38" selection-end-column="9" />
+            <state relative-caret-position="160">
+              <caret line="83" column="12" selection-start-line="83" selection-start-column="12" selection-end-line="83" selection-end-column="12" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -71,11 +62,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/house/MessageHandler.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="540">
-              <caret line="86" column="45" selection-start-line="86" selection-start-column="45" selection-end-line="86" selection-end-column="45" />
+            <state relative-caret-position="-452">
+              <caret line="47" column="21" selection-start-line="47" selection-start-column="21" selection-end-line="47" selection-end-column="21" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -86,22 +77,16 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/utility/Message.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret line="25" column="5" selection-start-line="25" selection-start-column="5" selection-end-line="25" selection-end-column="5" />
+            <state relative-caret-position="252">
+              <caret line="95" column="21" selection-start-line="95" selection-start-column="21" selection-end-line="95" selection-end-column="21" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#1997#1998#0" expanded="true" />
-                <element signature="e#2030#2031#0" expanded="true" />
-                <element signature="e#2201#2202#0" expanded="true" />
-                <element signature="e#2230#2231#0" expanded="true" />
-                <element signature="e#2263#2264#0" expanded="true" />
-                <element signature="e#2292#2293#0" expanded="true" />
-                <element signature="e#2326#2327#0" expanded="true" />
-                <element signature="e#2356#2357#0" expanded="true" />
-                <element signature="e#2392#2393#0" expanded="true" />
-                <element signature="e#2424#2425#0" expanded="true" />
-                <element signature="e#2472#2473#0" expanded="true" />
-                <element signature="e#2505#2506#0" expanded="true" />
+                <element signature="e#2712#2713#0" expanded="true" />
+                <element signature="e#2741#2742#0" expanded="true" />
+                <element signature="e#3261#3262#0" expanded="true" />
+                <element signature="e#3293#3294#0" expanded="true" />
+                <element signature="e#3534#3535#0" expanded="true" />
+                <element signature="e#3567#3568#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -110,8 +95,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/house/HouseServer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="702">
-              <caret line="45" column="70" selection-start-line="45" selection-start-column="70" selection-end-line="45" selection-end-column="70" />
+            <state relative-caret-position="252">
+              <caret line="14" column="17" selection-start-line="14" selection-start-column="17" selection-end-line="14" selection-end-column="17" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#810#811#0" expanded="true" />
@@ -191,10 +176,10 @@
         <option value="$PROJECT_DIR$/utility/Statistics.java" />
         <option value="$PROJECT_DIR$/utility/Condo.java" />
         <option value="$PROJECT_DIR$/house/HouseServer.java" />
-        <option value="$PROJECT_DIR$/utility/Message.java" />
-        <option value="$PROJECT_DIR$/house/MessageHandler.java" />
         <option value="$PROJECT_DIR$/services/AdministratorServer.java" />
         <option value="$PROJECT_DIR$/house/House.java" />
+        <option value="$PROJECT_DIR$/utility/Message.java" />
+        <option value="$PROJECT_DIR$/house/MessageHandler.java" />
       </list>
     </option>
   </component>
@@ -252,7 +237,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1564874250072" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1564887981659" />
     <property name="extract.method.default.visibility" value="private" />
     <property name="last_opened_file_path" value="$USER_HOME$/Documents/univ/sdp/lab/lab3/grpc_examples" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
@@ -276,11 +261,11 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Application.House">
-    <configuration name="House" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Application.House2">
+    <configuration name="House" type="Application" factoryName="Application" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="house.House" />
       <module name="condominium" />
-      <option name="PROGRAM_PARAMETERS" value="23 12345 1337 localhost" />
+      <option name="PROGRAM_PARAMETERS" value="23 2300 1337 localhost" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="house.*" />
@@ -291,23 +276,48 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="StartAdministratorServer" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+    <configuration name="House2" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="house.House" />
+      <module name="condominium" />
+      <option name="PROGRAM_PARAMETERS" value="22 2200 1337 localhost" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="House3" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="house.House" />
+      <module name="condominium" />
+      <option name="PROGRAM_PARAMETERS" value="21 2100 1337 localhost" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="StartAdministratorServer" type="Application" factoryName="Application" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="StartAdministratorServer" />
       <module name="condominium" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="Network" type="CompoundRunConfigurationType">
+      <toRun name="StartAdministratorServer" type="Application" />
+      <toRun name="House2" type="Application" />
+      <toRun name="House" type="Application" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="CompoundRunConfigurationType">
+      <toRun name="StartAdministratorServer" type="Application" />
+      <toRun name="House2" type="Application" />
+      <toRun name="House" type="Application" />
+      <method v="2" />
+    </configuration>
     <list>
+      <item itemvalue="Application.House2" />
+      <item itemvalue="Application.House3" />
       <item itemvalue="Application.House" />
       <item itemvalue="Application.StartAdministratorServer" />
+      <item itemvalue="Compound.Network" />
     </list>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Application.House" />
-        <item itemvalue="Application.StartAdministratorServer" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -320,12 +330,12 @@
       <option name="presentableId" value="Default" />
       <updated>1561581394759</updated>
       <workItem from="1561581396174" duration="44113000" />
-      <workItem from="1564126068991" duration="86619000" />
+      <workItem from="1564126068991" duration="96943000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="130732000" />
+    <option name="totallyTimeSpent" value="141056000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -340,17 +350,17 @@
     <frame x="0" y="0" width="1920" height="1030" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.8621746" visible="true" weight="0.18025751" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.84615386" visible="true" weight="0.18025751" />
       <window_info id="Designer" order="1" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Capture Tool" order="3" />
       <window_info id="UI Designer" order="4" />
-      <window_info id="Structure" order="5" sideWeight="0.13782541" side_tool="true" visible="true" weight="0.18025751" />
+      <window_info id="Structure" order="5" sideWeight="0.15384616" side_tool="true" visible="true" weight="0.18025751" />
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info id="Learn" order="7" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32951945" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.2520046" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.2520046" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -358,7 +368,7 @@
       <window_info anchor="bottom" id="Terminal" order="7" weight="0.3298969" />
       <window_info anchor="bottom" id="Docker" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5005365" side_tool="true" weight="0.17734554" />
-      <window_info anchor="bottom" id="Messages" order="10" weight="0.3298969" />
+      <window_info anchor="bottom" id="Messages" order="10" visible="true" weight="0.3298969" />
       <window_info anchor="bottom" id="Java Enterprise" order="11" weight="0.3298969" />
       <window_info anchor="bottom" id="Database Changes" order="12" />
       <window_info anchor="bottom" id="Version Control" order="13" sideWeight="0.49946353" weight="0.17734554" />
@@ -489,16 +499,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/utility/Notifier.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="534">
-          <caret line="47" column="30" selection-start-line="47" selection-start-column="30" selection-end-line="47" selection-end-column="30" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/beans/AdministratorBean.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="198">
@@ -584,56 +584,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/house/MessageHandler.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="540">
-          <caret line="86" column="45" selection-start-line="86" selection-start-column="45" selection-end-line="86" selection-end-column="45" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/utility/Statistics.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="432">
           <caret line="42" column="74" selection-start-line="42" selection-start-column="74" selection-end-line="42" selection-end-column="74" />
           <folding>
             <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/utility/Message.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret line="25" column="5" selection-start-line="25" selection-start-column="5" selection-end-line="25" selection-end-column="5" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#1997#1998#0" expanded="true" />
-            <element signature="e#2030#2031#0" expanded="true" />
-            <element signature="e#2201#2202#0" expanded="true" />
-            <element signature="e#2230#2231#0" expanded="true" />
-            <element signature="e#2263#2264#0" expanded="true" />
-            <element signature="e#2292#2293#0" expanded="true" />
-            <element signature="e#2326#2327#0" expanded="true" />
-            <element signature="e#2356#2357#0" expanded="true" />
-            <element signature="e#2392#2393#0" expanded="true" />
-            <element signature="e#2424#2425#0" expanded="true" />
-            <element signature="e#2472#2473#0" expanded="true" />
-            <element signature="e#2505#2506#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/house/HouseServer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="702">
-          <caret line="45" column="70" selection-start-line="45" selection-start-column="70" selection-end-line="45" selection-end-column="70" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#810#811#0" expanded="true" />
-            <element signature="e#842#843#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -645,6 +601,13 @@
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$PROJECT_DIR$/out/production/condominium/lib/jersey-client-1.19.1.jar!/com/sun/jersey/api/client/GenericType.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="54">
+          <caret line="4" column="14" selection-start-line="4" selection-start-column="14" selection-end-line="4" selection-end-column="14" />
         </state>
       </provider>
     </entry>
@@ -660,17 +623,58 @@
         </state>
       </provider>
     </entry>
-    <entry file="jar://$PROJECT_DIR$/out/production/condominium/lib/jersey-client-1.19.1.jar!/com/sun/jersey/api/client/GenericType.class">
+    <entry file="file://$PROJECT_DIR$/utility/Notifier.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="54">
-          <caret line="4" column="14" selection-start-line="4" selection-start-column="14" selection-end-line="4" selection-end-column="14" />
+        <state relative-caret-position="846">
+          <caret line="47" column="30" selection-start-line="47" selection-start-column="30" selection-end-line="47" selection-end-column="30" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/house/House.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="38" column="9" selection-start-line="38" selection-start-column="9" selection-end-line="38" selection-end-column="9" />
+        <state relative-caret-position="160">
+          <caret line="83" column="12" selection-start-line="83" selection-start-column="12" selection-end-line="83" selection-end-column="12" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/house/HouseServer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="14" column="17" selection-start-line="14" selection-start-column="17" selection-end-line="14" selection-end-column="17" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#810#811#0" expanded="true" />
+            <element signature="e#842#843#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utility/Message.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="95" column="21" selection-start-line="95" selection-start-column="21" selection-end-line="95" selection-end-column="21" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#2712#2713#0" expanded="true" />
+            <element signature="e#2741#2742#0" expanded="true" />
+            <element signature="e#3261#3262#0" expanded="true" />
+            <element signature="e#3293#3294#0" expanded="true" />
+            <element signature="e#3534#3535#0" expanded="true" />
+            <element signature="e#3567#3568#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/house/MessageHandler.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-452">
+          <caret line="47" column="21" selection-start-line="47" selection-start-column="21" selection-end-line="47" selection-end-column="21" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

@@ -7,24 +7,15 @@ import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.api.json.JSONConfiguration;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.ObjectWriter;
-import utility.Condo;
 import utility.Message;
 
-import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.Hashtable;
 
 public class House {
-
 
     public static void main(String args[]) {
         int id = Integer.parseInt(args[0]);
@@ -79,6 +70,7 @@ public class House {
         */
 
         //send hello to all the other houses when entering the network
+        /*
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String houseJSON;
         try {
@@ -86,19 +78,23 @@ public class House {
         } catch (IOException e) {
             throw new RuntimeException("Cannot transform HouseBean to JSON");
         }
+        */
         Message msg = new Message();
-        msg.setHeader("HELLO");
-        msg.setContent(houseJSON);
+        try {
+            msg.setHeader("HELLO");
+            msg.setContent(houseServer.getHouseBean());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         for (HouseBean hb: housesList.values()) {
             try {
                 Socket helloSocket = new Socket(hb.getIpAddress(), hb.getPort());
                 DataOutputStream helloOut = new DataOutputStream(helloSocket.getOutputStream());
-                System.out.println(msg.toJSONString());
                 helloOut.writeUTF(msg.toJSONString());
                 helloOut.flush();
-                //helloOut.close();
-                //helloSocket.close();
+                helloOut.close();
+                helloSocket.close();
             } catch (Exception e) {System.err.println(e.getMessage() + ". Unable to send HELLO msg to the house with ID: " + hb.getId());}
         }
 

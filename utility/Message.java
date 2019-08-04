@@ -20,14 +20,15 @@ public class Message {
     private ObjectMapper om;
 
     public Message(){
-        setHeader("");
-        setContent("");
+        header = "EMPTY";
+        content = "";
         parameters = new ArrayList<>();
-        setTimestamp("");
+        timestamp= "";
         ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        om = new ObjectMapper();
     }
 
-    public void fromJSONString(String s) throws JSONException {
+    public void fromJSONString(String s) throws JSONException, IOException {
         JSONObject j = new JSONObject(s);
         setHeader(j.getString("header"));
         setContent(j.getString("content"));
@@ -56,49 +57,67 @@ public class Message {
         header = s;
     }
 
-    /*
     public void setHeader(Object o) throws IOException {
         header = ow.writeValueAsString(o);
     }
-    */
 
     public void setContent(String s) {
         content = s;
     }
 
-    /*
     public void setContent(Object o) throws IOException {
         content = ow.writeValueAsString(o);
     }
-    */
 
     public void addParameter(String s) {
         parameters.add(s);
     }
 
-    public void addParameters(ArrayList<String> s) {
-        for (String el: s) {
-            addParameter(el);
+    public void addParameter(Object o) throws IOException {
+        parameters.add(ow.writeValueAsString(o));
+    }
+
+    public void setParameters(ArrayList<Object> list) throws IOException {
+        for (Object o: list) {
+            addParameter(o);
         }
     }
 
-    public void setTimestamp(String s) {
-        timestamp = s;
+    public void setTimestamp(Object o) throws IOException {
+        timestamp = ow.writeValueAsString(o);
     }
 
     public String getHeader() {
         return header;
     }
 
-    public String getContent() {
-        return content;
+    public <T> T getHeader(Class<T> cls) throws IOException {
+        return om.readValue(header, cls);
+    }
+
+    public String getContent() { return content;
+    }
+
+    public <T> T getContent(Class<T> cls) throws IOException {
+            return om.readValue(content, cls);
     }
 
     public String getTimestamp() {
         return timestamp;
     }
 
+    public <T> T getTimestamp(Class<T> cls) throws IOException {
+            return om.readValue(timestamp, cls);
+    }
+
     public ArrayList<String> getParameters() {
         return parameters;
+    }
+
+    public <T> ArrayList<T> getParameters(Class<T> cls) throws IOException {
+        ArrayList<T> tmp = new ArrayList<>();
+        for (String s: parameters)
+            tmp.add(om.readValue(s, cls));
+        return tmp;
     }
 }
