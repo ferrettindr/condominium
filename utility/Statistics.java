@@ -1,7 +1,8 @@
-package beans;
+package utility;
 
 import java.util.*;
-import utility.RWLock;
+
+import beans.StatBean;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -10,7 +11,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 @XmlAccessorType (XmlAccessType.FIELD)
-public class StatisticsBean {
+public class Statistics {
 
     //server data structure for saving stats of all houses
 
@@ -19,19 +20,19 @@ public class StatisticsBean {
     @XmlElement(name="condoStat")
     private ArrayList<StatBean> condoStats;
 
-    private  static StatisticsBean instance = null;
+    private  static Statistics instance = null;
     public RWLock rwLock;
 
     //singleton
-    public StatisticsBean() {
+    public Statistics() {
         statsTable = new Hashtable<Integer, ArrayList<StatBean>>();
         condoStats = new ArrayList<StatBean>();
         rwLock = new RWLock();
     }
 
-    public synchronized static StatisticsBean getInstance(){
+    public synchronized static Statistics getInstance(){
         if(instance==null)
-            instance = new StatisticsBean();
+            instance = new Statistics();
         return instance;
     }
 

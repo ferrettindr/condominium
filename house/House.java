@@ -1,40 +1,30 @@
 package house;
 
-import beans.CondoTableBean;
 import beans.HouseBean;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.api.json.JSONConfiguration;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.ObjectWriter;
+import utility.Condo;
+import utility.Message;
 
+import java.io.DataOutput;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Hashtable;
 
 public class House {
 
-    int localId;
-    int localPort;
-    int serverPort;
-    String serverIp;
-    HouseBean houseBean = new HouseBean();
-
-    public House(int id, int port, int serverPort, String serverIp) {
-        this.localId = id;
-        this.localPort = port;
-        this.serverPort = serverPort;
-        this.serverIp = serverIp;
-        houseBean.setId(localId);
-        houseBean.setPort(localPort);
-        try {
-            houseBean.setIpAddress(InetAddress.getLocalHost().getHostAddress());
-        } catch (UnknownHostException e) {throw new RuntimeException("Unable to get local IP");}
-    }
-
-    public HouseBean getHouseBean() {
-        return houseBean;
-    }
 
     public static void main(String args[]) {
         int id = Integer.parseInt(args[0]);
@@ -43,26 +33,74 @@ public class House {
         String serverIp = args[3];
 
         //TODO insert the possibility to insert the parameters after launching the program
-        House house = new House(id, port, serverPort, serverIp);
+        HouseServer houseServer = new HouseServer(id, port, serverPort, serverIp);
+        //start the house server
+        Thread houseServerThread = new Thread(houseServer);
+        houseServerThread.start();
 
         //Insert the house into the condo and get the list of houses from the server
         String webURL = "http://" + serverIp + ":" + serverPort + "/condo/";
 
         ClientConfig cc = new DefaultClientConfig();
         cc.getClasses().add(JacksonJsonProvider.class);
+        //cc.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, true);
         Client client = Client.create(cc);
 
         WebResource resource = client.resource(webURL+"house/add/");
-        ClientResponse response = resource.type("application/json").post(ClientResponse.class, house.getHouseBean());
+        ClientResponse response = resource.type("application/json").post(ClientResponse.class, houseServer.getHouseBean());
         if (response.getStatus() == 409) {
-            throw new RuntimeException("House ID: " + house.getHouseBean().getId() + " already in use pick another one and try again");
+            throw new RuntimeException("House ID: " + houseServer.getHouseBean().getId() + " already in use pick another one and try again");
         }
         if (response.getStatus() != 200) {
             throw new RuntimeException("Failed to register to the condo server, aborting. HTTP error: " + response.getStatus());
         }
 
-        CondoTableBean housesList = response.getEntity(CondoTableBean.class);
 
+        //server response with the other houses in the network
+        Hashtable<Integer, HouseBean> housesList = response.getEntity(new GenericType<Hashtable<Integer, HouseBean>>() {});
+        housesList.remove(houseServer.getHouseBean().getId());
+
+
+        /* how to serialize and deserialize with ow
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String json = "ciao";
+        try {
+            json = ow.writeValueAsString(houseServer.getHouseBean());
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot transform HouseBean to JSON");
+        }
+        ObjectMapper om = new ObjectMapper();
+        HouseBean hb = null;
+        try {
+            hb = om.readValue(json, HouseBean.class);
+        } catch (IOException e) {
+            throw new RuntimeException(("Cannot transform JSON to HouseBean"));
+        }
+        */
+
+        //send hello to all the other houses when entering the network
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String houseJSON;
+        try {
+            houseJSON = ow.writeValueAsString(houseServer.getHouseBean());
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot transform HouseBean to JSON");
+        }
+        Message msg = new Message();
+        msg.setHeader("HELLO");
+        msg.setContent(houseJSON);
+
+        for (HouseBean hb: housesList.values()) {
+            try {
+                Socket helloSocket = new Socket(hb.getIpAddress(), hb.getPort());
+                DataOutputStream helloOut = new DataOutputStream(helloSocket.getOutputStream());
+                System.out.println(msg.toJSONString());
+                helloOut.writeUTF(msg.toJSONString());
+                helloOut.flush();
+                //helloOut.close();
+                //helloSocket.close();
+            } catch (Exception e) {System.err.println(e.getMessage() + ". Unable to send HELLO msg to the house with ID: " + hb.getId());}
+        }
 
 
     }

@@ -4,6 +4,7 @@ package services;
 import beans.*;
 import utility.Condo;
 import utility.Notifier;
+import utility.Statistics;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -34,9 +35,7 @@ public class AdministratorServer {
     public Response addHouse(HouseBean h){
         if (Condo.getInstance().addHouse(h)) {
             inNotifier.notify(h);
-            CondoTableBean ctb = new CondoTableBean();
-            ctb.setHouseTable(Condo.getInstance().getCondoTable());
-            return Response.ok(ctb).build();
+            return Response.ok(Condo.getInstance().getCondoTable()).build();
         }
         else
             return Response.status(Response.Status.CONFLICT).entity("The chosen ID: " + h.getId() + " is already being used by another house.").build();
@@ -46,7 +45,7 @@ public class AdministratorServer {
     @Path("house/remove/{id}")
     @DELETE
     public Response removeHouse(@PathParam("id") int id){
-        StatisticsBean stat = StatisticsBean.getInstance();
+        Statistics stat = Statistics.getInstance();
         //lock to avoid race condition if someone is using stats
         //no-deadlock because it's the same thread
         stat.rwLock.beginWrite();
@@ -71,7 +70,7 @@ public class AdministratorServer {
     @PUT
     @Consumes({"application/json"})
     public Response addStatistics(StatPkgBean pkg) {
-        StatisticsBean.getInstance().addStatistics(pkg.getHousesStat(), pkg.getCondoStat());
+        Statistics.getInstance().addStatistics(pkg.getHousesStat(), pkg.getCondoStat());
         return Response.ok().build();
     }
 
@@ -80,7 +79,7 @@ public class AdministratorServer {
     @GET
     @Produces({"application/json"})
     public Response getCondoStatistics(@PathParam("n") int n) {
-        List<StatBean> stats = StatisticsBean.getInstance().getCondoStat(n);
+        List<StatBean> stats = Statistics.getInstance().getCondoStat(n);
         return Response.ok(stats).build();
     }
 
@@ -89,7 +88,7 @@ public class AdministratorServer {
     @GET
     @Produces({"application/json"})
     public Response getHouseStatistics(@PathParam("id") int id,@PathParam("n") int n) {
-        List<StatBean> stats = StatisticsBean.getInstance().getHouseStat(id, n);
+        List<StatBean> stats = Statistics.getInstance().getHouseStat(id, n);
         return Response.ok(stats).build();
     }
 
@@ -98,7 +97,7 @@ public class AdministratorServer {
     @GET
     @Produces({"application/json"})
     public Response getCondoAnalytics(@PathParam("n") int n) {
-        List<StatBean> stats = StatisticsBean.getInstance().getCondoStat(n);
+        List<StatBean> stats = Statistics.getInstance().getCondoStat(n);
         return Response.ok(calculateAnalytics(stats, n)).build();
     }
 
@@ -108,7 +107,7 @@ public class AdministratorServer {
     @Consumes({"application/json"})
     @Produces({"application/json"})
     public Response getHouseAnalytics(@PathParam("id") int id,@PathParam("n") int n) {
-        List<StatBean> stats = StatisticsBean.getInstance().getHouseStat(id, n);
+        List<StatBean> stats = Statistics.getInstance().getHouseStat(id, n);
         return Response.ok(calculateAnalytics(stats, n)).build();
     }
 
