@@ -7,16 +7,15 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 
 public class HouseServer implements Runnable{
 
-    ServerSocket serverSocket;
-    int localId;
-    int localPort;
-    int remoteServerPort;
-    String remoteServerIp;
-    HouseBean houseBean;
+    private ServerSocket serverSocket;
+    private int localId;
+    private int localPort;
+    private int remoteServerPort;
+    private String remoteServerIp;
+    private HouseBean houseBean;
 
     public HouseServer(int id, int port, int serverPort, String serverIp) {
         this.localId = id;
@@ -52,7 +51,7 @@ public class HouseServer implements Runnable{
                 Thread handler = new Thread(new MessageHandler(s, houseBean));
                 handler.start();
             } catch (IOException e) {System.out.println("Shutting down the house server...");}
-            //remove the dead threads
         }
+        System.out.println("House server stopped.");
     }
 }

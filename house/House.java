@@ -33,7 +33,6 @@ public class House {
         int remoteServerPort = Integer.parseInt(args[2]);
         String remoteServerIp = args[3];
 
-        //TODO insert the possibility to insert the parameters after launching the program
         houseServer = new HouseServer(id, port, remoteServerPort, remoteServerIp);
         //start the house server
         Thread houseServerThread = new Thread(houseServer);
@@ -47,15 +46,9 @@ public class House {
         //cc.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, true);
         Client client = Client.create(cc);
 
-        //TODO prompt for new parameters or kill houseServer and set stopped
         WebResource resource = client.resource(webURL+"house/add/");
         ClientResponse response = resource.type("application/json").post(ClientResponse.class, houseServer.getHouseBean());
-        if (response.getStatus() == 409) {
-            throw new RuntimeException("House ID: " + houseServer.getHouseBean().getId() + " already in use pick another one and try again");
-        }
-        if (response.getStatus() != 200) {
-            throw new RuntimeException("Failed to register to the condo server, aborting. HTTP error: " + response.getStatus());
-        }
+        handleResponse(response, true);
 
         //server response with the other houses in the network
         Hashtable<Integer, HouseBean> housesList = response.getEntity(new GenericType<Hashtable<Integer, HouseBean>>() {});
@@ -77,11 +70,7 @@ public class House {
                 case "exit":
                     sendRemovalToServer(client);
                     sendRemovalToNetwork(Condo.getInstance().getCondoTable());
-                    try {
-                        houseServer.getSocket().close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    shutdown();
                     break;
                 case "boost":
                     break;
@@ -94,12 +83,26 @@ public class House {
     private static void sendRemovalToServer(Client client) {
         WebResource resource = client.resource(webURL+"house/remove/"+ houseServer.getHouseBean().getId());
         ClientResponse response = resource.type("application/json").delete(ClientResponse.class);
-        //TODO kill threads if fail and set stopped and refactor response handling to function and shutting down
-        if (response.getStatus() == 409) {
-            throw new RuntimeException("House ID: " + houseServer.getHouseBean().getId() + " not present in the condo server");
+        handleResponse(response, false);
+    }
+
+    //shuts down the house and the server
+    private static void shutdown() {
+        try {
+            stopped = true;
+            houseServer.getSocket().close();
+        } catch (IOException e) {
+            //should never happen
+            e.printStackTrace();
         }
-        if (response.getStatus() != 200) {
-            throw new RuntimeException("Failed to remove the house from the condo server, aborting. HTTP error: " + response.getStatus());
+    }
+
+    //handle http response from restful web server. If abort is true the house is shotdown in case of an error status
+    private static void handleResponse(ClientResponse cr, boolean abort) {
+        if (cr.getStatus() != 200) {
+            System.out.println("" + cr.getStatus() + " " + cr.getStatusInfo().getReasonPhrase() + ": " + cr.getEntity(String.class));
+            if (abort)
+                shutdown();
         }
     }
 
@@ -117,6 +120,7 @@ public class House {
         }
     }
 
+    //inform the other houses of the condo of its exit
     private static void sendRemovalToNetwork(Hashtable<Integer, HouseBean> housesTable) {
         //mutual exclusion with other messages
         stopped = true;
@@ -134,6 +138,7 @@ public class House {
     }
 
 
+    //inform the other houses of the condo of its entrance
     private static void sendHello(Hashtable<Integer, HouseBean> housesTable) {
         Message msg = new Message();
         msg.setHeader("HELLO");

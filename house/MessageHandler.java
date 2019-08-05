@@ -12,17 +12,15 @@ import utility.Message;
 
 public class MessageHandler implements Runnable {
 
-    Socket socket;
-    DataOutputStream output;
-    DataInputStream input;
-    HouseBean houseBean;
+    private Socket socket;
+    private DataInputStream input;
+    private HouseBean houseBean;
 
     public MessageHandler(Socket s, HouseBean houseBean) {
         socket = s;
         this.houseBean = houseBean;
         try {
             input = new DataInputStream(s.getInputStream());
-            output = new DataOutputStream(s.getOutputStream());
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
