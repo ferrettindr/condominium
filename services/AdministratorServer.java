@@ -38,7 +38,7 @@ public class AdministratorServer {
             return Response.ok(Condo.getInstance().getCondoTable()).build();
         }
         else
-            return Response.status(Response.Status.CONFLICT).entity("The chosen ID: " + h.getId() + " is already being used by another house.").build();
+            return Response.status(Response.Status.CONFLICT).entity("There is already a house with ID: " + h.getId()).build();
     }
 
     //remove a house and its stats from the condo

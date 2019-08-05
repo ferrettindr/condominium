@@ -6,18 +6,11 @@ import java.io.IOException;
 import java.net.Socket;
 
 import beans.HouseBean;
-//import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jettison.json.JSONException;
 import utility.Condo;
 import utility.Message;
 
 public class MessageHandler implements Runnable {
-
-    protected enum headerTYPE{
-        HELLO,
-        ACK_HELLO,
-        EMPTY;
-    }
 
     Socket socket;
     DataOutputStream output;
@@ -39,10 +32,17 @@ public class MessageHandler implements Runnable {
     //TODO handle all message that can be possibly received
     @Override
     public void run() {
+        //message reception in mutual exclusion to removal
+        House.stoppedLock.beginRead();
+
+        if (House.stopped) {
+            House.stoppedLock.endRead();
+            return;
+        }
+
         Message msg = new Message();
         try {
             String stringMsg = input.readUTF();
-            System.out.println(stringMsg);
             msg.fromJSONString(stringMsg);
         }
         catch (IOException e) {System.err.println(e.getMessage());}
@@ -53,19 +53,34 @@ public class MessageHandler implements Runnable {
             case "ACK_HELLO":
                 try {
                     helloAckResponse(msg);
-                } catch (IOException e) {System.err.println("Cannot respond to hello ack message" + e.getMessage()); e.printStackTrace();}
+                } catch (IOException e) {System.err.println("Cannot respond to hello ack message: " + e.getMessage()); e.printStackTrace();}
                 break;
             case "HELLO":
+                //removing the house and responding to hello are mutual exclusive
                 try {
                     helloResponse(msg);
-                } catch (Exception e) {System.err.println("Cannot respond to hello message: " + e.getMessage()); e.printStackTrace();}
+                } catch (Exception e) {
+                    System.err.println("Cannot respond to hello message: " + e.getMessage());
+                    e.printStackTrace();
+                }
+                break;
+            case "REMOVE":
+                try {
+                    HouseBean hb = msg.getContent(HouseBean.class);
+                    Condo.getInstance().removeHouse(hb.getId());
+                } catch (IOException e) {System.err.println("Cannot respond to remove msg: " + e.getMessage());}
+                System.out.println(Condo.getInstance().getCondoTable().toString());
                 break;
             default:
                 System.err.println("Unknown message format: " + msg.getHeader());
         }
-        //switch (msg.getHeader())
+
+        System.out.println("Finished handling msg");
+        House.stoppedLock.endRead();
     }
 
+
+    //add the house that sent hello to local condo and send back ack
     private void helloResponse(Message msg) throws JSONException, IOException {
         HouseBean newHouse = msg.getContent(HouseBean.class);
         Condo.getInstance().addHouse(newHouse);
@@ -84,6 +99,7 @@ public class MessageHandler implements Runnable {
         System.out.println("HELLO RESPONOSE by id: " + houseBean.getId());
     }
 
+    //add house that sent the ack to the local condo
     private void helloAckResponse(Message msg) throws IOException {
         HouseBean hb = msg.getContent(HouseBean.class);
         Condo.getInstance().addHouse(hb);
