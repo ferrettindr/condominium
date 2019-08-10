@@ -51,13 +51,11 @@ public class MessageHandler implements Runnable {
                 break;
             case "ACK_ELECTED":
                 // not in mutual exclusion to stopped because
-                System.out.println("Handling ack elected");
                 //TODO understand why it thorws illegalMonitorStateException
                 synchronized ((House.newElected)) {
                     House.newElected = true;
                     //House.newElected.notify();
                 }
-                System.out.println("Finished ack elected");
                 break;
             case "ACK_HELLO_COORDINATOR":
                 getStoppedLock();
@@ -96,7 +94,7 @@ public class MessageHandler implements Runnable {
                 System.err.println("Unknown message format: " + msg.getHeader());
         }
 
-        System.out.println("Finished handling msg");
+        System.out.println("Finished handling msg: " + msg.getHeader());
         House.stoppedLock.endRead();
     }
 
@@ -121,7 +119,8 @@ public class MessageHandler implements Runnable {
     private void handleHello(Message msg) throws JSONException, IOException {
         HouseBean newHouse = msg.getContent(HouseBean.class);
         Condo.getInstance().addHouse(newHouse);
-        System.out.println("Condo table: " + Condo.getInstance().getCondoTable().toString());
+        //check if new house should be coordinator
+        House.updateCoordinator(newHouse, msg.getParameters(Integer.class).get(0));
 
         Message helloAck = new Message();
         //if the node responding to hello is the coordinator alert in the ack

@@ -38,19 +38,23 @@ service provided by the administrator server:
         - receive boost request and act accordingly (richart and awairt)
     informs other houses of its presence (wait for ack, leader tells who he is, if no ack remove from local condo)
     starts smart meter and sends other houses.
-    if it thinks it should be the leader starts an election
-    if wins election sends to the server condo stats when available the full bulk
+    if is the coordinator sends to the server condo stats when available the full bulk
     allow from command line to request boost or removal
     when removed from the server send all nodes in the local condo
     if removed release boost (remove from queue and send other nodes in queue the removal)
 
+    ENTERING THE NETWORK
     when a house starts it sends every other houses in the condo (given by the server) a hello.
     The other houses respond to the hello with a message. The houses adds to her local condo only the houses that responds to the hello.
-    If other messages arrives from a house not in the local condo, that house gets added to the local condo.
+    If a house remove itself it stops receiving messages except for the ack elected.
 
 
     ELECTION
-    At the beginning the only house present is the coordinator. The coordinator responds to hello saying it is the coordinator.
+    At the beginning the only house present is the coordinator. Every node that has itself as coordinator responds to hello saying it is the coordinator.
     At removal the coordinator sends the house with the highest id in the condo a removal informing it it is the new coordinator.
     The new coordinator sends msg to everyone saying it's the new coordinator. Associated a counter to the coordinator to resolve
-    issue related to removal of a node after he is elected. When a node receives a new coordinator, it updates it if the counter is higher.
+    issue related to removal of a node after he is elected. When a node receives a new coordinator, it updates it if the counter is higher
+    than its, or if the counter is the same value it gets updated if the sender id is higher than the receiver. This way is handled
+    the problem when a house joins and there's only the coordinator, but the coordinator removes itself before it receives the hello and doesn't
+    elect the new house. This is solved by having every house initialize itself as coordinator with counter -1. When another house will join
+    the one with highest id will become coordinator.

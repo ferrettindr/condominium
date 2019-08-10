@@ -62,6 +62,12 @@ public class House {
         Hashtable<Integer, HouseBean> housesList = response.getEntity(new GenericType<Hashtable<Integer, HouseBean>>() {});
         housesList.remove(houseServer.getHouseBean().getId());
 
+        //TESTING SLEEP
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         //if house is empty become coordinator
         if (housesList.isEmpty())
             updateCoordinator(houseServer.getHouseBean(), 0);
@@ -69,8 +75,8 @@ public class House {
         //this is down in case of all the other houses in the list removing themselves before the hello is received
         else {
             //send a hello msg to all the other houses in the network
-            sendHello(housesList);
             updateCoordinator(houseServer.getHouseBean(), -1);
+            sendHello(housesList);
         }
 
 
@@ -90,7 +96,7 @@ public class House {
                     sendRemovalToServer(client);
 
                     if (coordinator.getId() == houseServer.getHouseBean().getId() && !Condo.getInstance().getCondoTable().isEmpty()) {
-                        try {checkCoordinator();}
+                        try {electNewCoordinator();}
                         catch (IOException e) {e.printStackTrace();}
                         catch (JSONException e) {e.printStackTrace();}
                         catch (InterruptedException e) {e.printStackTrace();}
@@ -103,6 +109,12 @@ public class House {
                     shutdown();
                     break;
                 case "boost":
+                    break;
+                case "coordinator":
+                    System.out.println("My coordinator ID is: " + coordinator.getId() + " with counter: " + coordinatorCounter);
+                    break;
+                case "condo":
+                    System.out.println("My condo is: " + Condo.getInstance().getCondoTable().toString());
                     break;
                 default:
                     System.out.println("Unknown command");
@@ -162,7 +174,7 @@ public class House {
     }
 
     //if the house is the current coordinator select a new one and tell it
-    private static void checkCoordinator() throws IOException, JSONException, InterruptedException {
+    private static void electNewCoordinator() throws IOException, JSONException, InterruptedException {
         newElected = false;
         int counter = coordinatorCounter;
         coordinator = null;
@@ -221,6 +233,7 @@ public class House {
         msg.setHeader("HELLO");
         try {
             msg.setContent(houseServer.getHouseBean());
+            msg.addParameter(coordinatorCounter);
         } catch (IOException e) {e.printStackTrace();}
 
         sendMessageToCondo(housesTable.values(), msg);
