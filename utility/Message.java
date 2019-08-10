@@ -34,7 +34,7 @@ public class Message {
         setContent(j.getString("content"));
         JSONArray a = j.getJSONArray("parameters");
         if (a.length() > 0)
-            for (int i = 0; i < j.length(); i++) {
+            for (int i = 0; i < a.length(); i++) {
                 String value = a.getString(i);
                 addParameter(value);
             }

@@ -8,23 +8,31 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
+import org.codehaus.jettison.json.JSONException;
 import utility.Condo;
 import utility.Message;
+import utility.MessageSender;
 import utility.RWLock;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 
 public class House {
 
-    protected static final RWLock stoppedLock = new RWLock();
-    protected static volatile boolean stopped = false;
-    protected static String webURL;
+    static final RWLock stoppedLock = new RWLock();
+    static volatile boolean stopped = false;
+    static String webURL;
+    static HouseBean coordinator;
+    static int coordinatorCounter;
+    static RWLock coordinatorLock = new RWLock();
+    static Boolean newElected;
     private static HouseServer houseServer;
 
     public static void main(String args[]) {
@@ -54,8 +62,18 @@ public class House {
         Hashtable<Integer, HouseBean> housesList = response.getEntity(new GenericType<Hashtable<Integer, HouseBean>>() {});
         housesList.remove(houseServer.getHouseBean().getId());
 
-        //send a hello msg to all the other houses in the network
-        sendHello(housesList);
+        //if house is empty become coordinator
+        if (housesList.isEmpty())
+            updateCoordinator(houseServer.getHouseBean(), 0);
+        //otherwise send hello and set yourself as coordinator with less priority
+        //this is down in case of all the other houses in the list removing themselves before the hello is received
+        else {
+            //send a hello msg to all the other houses in the network
+            sendHello(housesList);
+            updateCoordinator(houseServer.getHouseBean(), -1);
+        }
+
+
 
         //prompt user for remove or boost
         System.out.println("Insert \"exit\" to exit from the condo or \"boost\" to request a boost in usage:");
@@ -68,8 +86,20 @@ public class House {
             } catch (IOException e) {System.err.println(e.getMessage() + "Cannot read user input");}
             switch (command) {
                 case "exit":
+                    stoppedLock.beginWrite();
                     sendRemovalToServer(client);
+
+                    if (coordinator.getId() == houseServer.getHouseBean().getId() && !Condo.getInstance().getCondoTable().isEmpty()) {
+                        try {checkCoordinator();}
+                        catch (IOException e) {e.printStackTrace();}
+                        catch (JSONException e) {e.printStackTrace();}
+                        catch (InterruptedException e) {e.printStackTrace();}
+                    }
+                    stopped = true;
+                    System.out.println("sending removal to network");
                     sendRemovalToNetwork(Condo.getInstance().getCondoTable());
+                    stoppedLock.endWrite();
+
                     shutdown();
                     break;
                 case "boost":
@@ -80,16 +110,11 @@ public class House {
         }
     }
 
-    private static void sendRemovalToServer(Client client) {
-        WebResource resource = client.resource(webURL+"house/remove/"+ houseServer.getHouseBean().getId());
-        ClientResponse response = resource.type("application/json").delete(ClientResponse.class);
-        handleResponse(response, false);
-    }
 
     //shuts down the house and the server
     private static void shutdown() {
+        System.out.println("Shutting down");
         try {
-            stopped = true;
             houseServer.getSocket().close();
         } catch (IOException e) {
             //should never happen
@@ -106,26 +131,80 @@ public class House {
         }
     }
 
-    //send a message to all the houses in the list
-    private static void sendMessageToCondo(Collection<HouseBean> housesList, Message msg) {
-        for (HouseBean hb: housesList) {
-            try {
-                Socket s = new Socket(hb.getIpAddress(), hb.getPort());
-                DataOutputStream Out = new DataOutputStream(s.getOutputStream());
-                Out.writeUTF(msg.toJSONString());
-                Out.flush();
-                Out.close();
-                s.close();
-            } catch(Exception e) {System.err.println(e.getMessage() + ". Unable to send " + msg.getHeader() + " msg to house with ID: " + hb.getId());}
+    static void updateCoordinator(HouseBean newCoord, int counter) {
+        coordinatorLock.beginWrite();
+        //if the coordinator is more recent or same counter but greater id
+        if (coordinator == null) {
+            coordinator = newCoord;
+            coordinatorCounter = counter;
         }
+        else if(counter > House.coordinatorCounter) {
+            coordinator = newCoord;
+            coordinatorCounter = counter;
+        }
+        else if (counter == House.coordinatorCounter && newCoord.getId() > coordinator.getId()) {
+            coordinator = newCoord;
+            coordinatorCounter = counter;
+        }
+        coordinatorLock.endWrite();
+    }
+
+    //TODO see if there's a better way for parallel sending and a way to wait for the ending of all the threads
+    //send a message to all the houses in the list
+    static ArrayList<Thread> sendMessageToCondo(Collection<HouseBean> housesList, Message msg) {
+        ArrayList<Thread> threadList = new ArrayList<>();
+        for (HouseBean hb: housesList) {
+            Thread thread = new Thread(new MessageSender(hb.getIpAddress(), hb.getPort(), msg, hb.getId()));
+            thread.start();
+            threadList.add(thread);
+        }
+        return threadList;
+    }
+
+    //if the house is the current coordinator select a new one and tell it
+    private static void checkCoordinator() throws IOException, JSONException, InterruptedException {
+        newElected = false;
+        int counter = coordinatorCounter;
+        coordinator = null;
+        //if the selected one doesn't respond select a new one and set it with higher priority
+        while (!newElected) {
+            Hashtable<Integer, HouseBean> condo =  Condo.getInstance().getCondoTable();
+            if (!condo.isEmpty()) {
+                int max = -1;
+                for (Integer i : condo.keySet())
+                    if (i >= max)
+                        max = i;
+                HouseBean newCoordinator = condo.get(max);
+                Message msg = new Message();
+                msg.setHeader("ELECTED");
+                msg.setContent(houseServer.getHouseBean());
+                counter += 1;
+                msg.addParameter(counter);
+                sendMessageToHouse(newCoordinator, msg);
+            }
+            synchronized (newElected) {
+                newElected.wait(2000);
+            }
+        }
+    }
+
+    static void sendMessageToHouse(HouseBean hb, Message msg) throws IOException, JSONException {
+        Socket sendSocket = new Socket(hb.getIpAddress(), hb.getPort());
+        DataOutputStream dos = new DataOutputStream(sendSocket.getOutputStream());
+        dos.writeUTF(msg.toJSONString());
+        dos.flush();
+        dos.close();
+        sendSocket.close();
+    }
+
+    private static void sendRemovalToServer(Client client) {
+        WebResource resource = client.resource(webURL+"house/remove/"+ houseServer.getHouseBean().getId());
+        ClientResponse response = resource.type("application/json").delete(ClientResponse.class);
+        handleResponse(response, false);
     }
 
     //inform the other houses of the condo of its exit
     private static void sendRemovalToNetwork(Hashtable<Integer, HouseBean> housesTable) {
-        //mutual exclusion with other messages
-        stopped = true;
-        stoppedLock.beginWrite();
-
         Message msg = new Message();
         msg.setHeader("REMOVE");
         try {
@@ -133,8 +212,6 @@ public class House {
         } catch (IOException e) {e.printStackTrace();}
 
         sendMessageToCondo(housesTable.values(), msg);
-
-        stoppedLock.endWrite();
     }
 
 

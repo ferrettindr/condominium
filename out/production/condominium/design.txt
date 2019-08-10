@@ -48,3 +48,9 @@ service provided by the administrator server:
     The other houses respond to the hello with a message. The houses adds to her local condo only the houses that responds to the hello.
     If other messages arrives from a house not in the local condo, that house gets added to the local condo.
 
+
+    ELECTION
+    At the beginning the only house present is the coordinator. The coordinator responds to hello saying it is the coordinator.
+    At removal the coordinator sends the house with the highest id in the condo a removal informing it it is the new coordinator.
+    The new coordinator sends msg to everyone saying it's the new coordinator. Associated a counter to the coordinator to resolve
+    issue related to removal of a node after he is elected. When a node receives a new coordinator, it updates it if the counter is higher.
