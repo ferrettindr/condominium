@@ -5,8 +5,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class StatBean {
 
-    private double consumption;
-    private int timestamp;
+    private double value;
+    private long timestamp;
 
     //TODO check if constructors are needed
     /*
@@ -19,19 +19,19 @@ public class StatBean {
     }
     */
 
-    public double getConsumption() {
-        return consumption;
+    public double getValue() {
+        return value;
     }
 
-    public void setConsumption(double consumption) {
-        this.consumption = consumption;
+    public void setValue(double v) {
+        this.value = v;
     }
 
-    public int getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(int timestamp) {
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 

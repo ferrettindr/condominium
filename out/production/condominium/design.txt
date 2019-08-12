@@ -57,4 +57,4 @@ service provided by the administrator server:
     than its, or if the counter is the same value it gets updated if the sender id is higher than the receiver. This way is handled
     the problem when a house joins and there's only the coordinator, but the coordinator removes itself before it receives the hello and doesn't
     elect the new house. This is solved by having every house initialize itself as coordinator with counter -1. When another house will join
-    the one with highest id will become coordinator.
+    the one with highest id will become coordinator. (Both hello and ack hello can elect coordinator).

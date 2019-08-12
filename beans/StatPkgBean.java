@@ -29,4 +29,8 @@ public class StatPkgBean {
         this.condoStat = stat;
     }
 
+    public void resetStats() {
+        houseStat.clear();
+        condoStat = null;
+    }
 }

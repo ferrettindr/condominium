@@ -57,7 +57,7 @@ public class Statistics {
         if (statsTable.containsKey(id))
             statsTable.get(id).add(stat);
         else {
-            ArrayList<StatBean> val = new ArrayList<StatBean>();
+            ArrayList<StatBean> val = new ArrayList<>();
             val.add(stat);
             statsTable.put(id, val);
         }
@@ -93,9 +93,9 @@ public class Statistics {
     //return the last n elements of list stats (shallow copy)
     private List<StatBean> getLastElements(int n, ArrayList<StatBean> stats) {
         ArrayList<StatBean> nStat = new ArrayList<>();
-        int start = stats.size() > n ? stats.size() - n - 1 : 0;
+        int start = stats.size() > n ? stats.size() - n : 0;
         for (int i = start; i < stats.size(); i++)
-            nStat.add(stats.get(i));
+            nStat.add(0, stats.get(i));
         return nStat;
     }
 

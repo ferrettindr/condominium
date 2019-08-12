@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.Socket;
 
 import beans.HouseBean;
+import beans.StatBean;
 import org.codehaus.jettison.json.JSONException;
 import utility.Condo;
 import utility.Message;
@@ -40,6 +41,17 @@ public class MessageHandler implements Runnable {
         switch (msg.getHeader()) {
             case "EMPTY":
                 break;
+            case "STATS":
+                getStoppedLock();
+                //if is elected House.houseServer.getHouseBean()add it to statistics otherwise ignore. Do a function that checks if you are the coordinator
+                //if i'm the coordinator add it to the structure
+                if (House.isCoordinator()) {
+                    try {
+                        House.statCoordinator.addStat(msg.getContent(HouseBean.class), msg.getParameters(StatBean.class).get(0));
+                    } catch (IOException e) {e.printStackTrace();}
+                }
+                releaseStoppedLock();
+                break;
                 //send to everyone ack_hello_coordinator and to coordinator ack_elected
             case "ELECTED":
                 getStoppedLock();
@@ -50,7 +62,7 @@ public class MessageHandler implements Runnable {
                 releaseStoppedLock();
                 break;
             case "ACK_ELECTED":
-                // not in mutual exclusion to stopped because
+                // not in mutual exclusion to stopped because needs to receive the message after it's stopped
                 //TODO understand why it thorws illegalMonitorStateException
                 synchronized ((House.newElected)) {
                     House.newElected = true;
@@ -125,7 +137,7 @@ public class MessageHandler implements Runnable {
         Message helloAck = new Message();
         //if the node responding to hello is the coordinator alert in the ack
         House.coordinatorLock.beginRead();
-        if (House.coordinator.getId() == houseBean.getId()) {
+        if (House.isCoordinator()) {
             helloAck.setHeader("ACK_HELLO_COORDINATOR");
             helloAck.addParameter(House.coordinatorCounter);
         }
@@ -145,7 +157,7 @@ public class MessageHandler implements Runnable {
         //if the sender of the ack is the coordinator
         if (ackedByCord) {
             House.updateCoordinator(hb, msg.getParameters(Integer.class).get(0));
-            System.out.println("Acked by coordinator with ID: " + House.coordinator.getId() + " with counter: " + House.coordinatorCounter);
+            System.out.println("Acked by coordinator with ID: " + hb.getId() + " with counter: " + msg.getParameters(Integer.class).get(0));
         }
         System.out.println("HELLO ACK RESPONSE by id: " + hb.getId());
         System.out.println("Condo table: " + Condo.getInstance().getCondoTable().toString());

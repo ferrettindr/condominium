@@ -28,27 +28,34 @@ public class AdministratorServer {
     }
 
     //insert new house in the condo if not already present
+    //remove the stat associated with previous id chosen now
     @Path("house/add")
     @POST
     @Consumes({"application/json"})
     @Produces({"application/json"})
     public Response addHouse(HouseBean h){
+
+        //get lock to avoid people adding new stats
+        Statistics.getInstance().rwLock.beginWrite();
+
+        Response result;
         if (Condo.getInstance().addHouse(h)) {
+            Statistics.getInstance().removeHouseStats(h.getId());
             inNotifier.notify(h);
-            return Response.ok(Condo.getInstance().getCondoTable()).build();
+            result = Response.ok(Condo.getInstance().getCondoTable()).build();
         }
         else
-            return Response.status(Response.Status.CONFLICT).entity("There is already a house with ID: " + h.getId()).build();
+            result = Response.status(Response.Status.CONFLICT).entity("There is already a house with ID: " + h.getId()).build();
+
+        Statistics.getInstance().rwLock.endWrite();
+
+        return result;
     }
 
-    //remove a house and its stats from the condo
+    //remove a house from the condo but leave the stats
     @Path("house/remove/{id}")
     @DELETE
     public Response removeHouse(@PathParam("id") int id){
-        Statistics stat = Statistics.getInstance();
-        //lock to avoid race condition if someone is using stats
-        //no-deadlock because it's the same thread
-        stat.rwLock.beginWrite();
 
         //if trying to remove a house not present abort
         Response result = Response.ok().build();
@@ -57,11 +64,8 @@ public class AdministratorServer {
             result = Response.status(Response.Status.CONFLICT).entity("Could not remove the house. There is no house with ID: " +  id).build();
         }
         else {
-            stat.removeHouseStats(id);
             outNotifier.notify(h);
         }
-
-        stat.rwLock.endWrite();
 
         return result;
     }
@@ -71,6 +75,8 @@ public class AdministratorServer {
     @Consumes({"application/json"})
     public Response addStatistics(StatPkgBean pkg) {
         Statistics.getInstance().addStatistics(pkg.getHousesStat(), pkg.getCondoStat());
+        System.out.println("Stats are being added. Condo: " + pkg.getCondoStat().getValue() + ":" + pkg.getCondoStat().getTimestamp());
+        System.out.println("Houses: " + pkg.getHousesStat().toString());
         return Response.ok().build();
     }
 
@@ -166,7 +172,7 @@ public class AdministratorServer {
     private double sumStat(Iterable<StatBean> stats) {
         double sum = 0;
         for (StatBean stat: stats)
-            sum += stat.getConsumption();
+            sum += stat.getValue();
         return sum;
     }
 
@@ -174,7 +180,7 @@ public class AdministratorServer {
     private double sumSquareStat(Iterable<StatBean> stats) {
         double sum = 0;
         for (StatBean stat: stats)
-            sum +=  Math.pow(stat.getConsumption(), 2);
+            sum +=  Math.pow(stat.getValue(), 2);
         return sum;
     }
 

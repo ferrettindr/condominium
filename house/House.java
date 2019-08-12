@@ -28,12 +28,18 @@ public class House {
 
     static final RWLock stoppedLock = new RWLock();
     static volatile boolean stopped = false;
-    static String webURL;
+
     static HouseBean coordinator;
     static int coordinatorCounter;
     static RWLock coordinatorLock = new RWLock();
     static Boolean newElected;
-    private static HouseServer houseServer;
+
+    static HouseServer houseServer;
+    static String webURL;
+
+    static StatCoordinator statCoordinator;
+    static StatSender statSender;
+    static SmartMeterSimulator sms;
 
     public static void main(String args[]) {
         int id = Integer.parseInt(args[0]);
@@ -54,6 +60,18 @@ public class House {
         //cc.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, true);
         Client client = Client.create(cc);
 
+        //start potential coordinator before connecting to server
+        statCoordinator = new StatCoordinator(client);
+        SlidingBuffer sbuff = new SlidingBuffer(24, 12);
+        statSender = new StatSender(sbuff);
+        statSender.start();
+
+        sms = new SmartMeterSimulator(sbuff);
+        sms.start();
+
+
+
+        //insert into the server
         WebResource resource = client.resource(webURL+"house/add/");
         ClientResponse response = resource.type("application/json").post(ClientResponse.class, houseServer.getHouseBean());
         handleResponse(response, true);
@@ -63,11 +81,14 @@ public class House {
         housesList.remove(houseServer.getHouseBean().getId());
 
         //TESTING SLEEP
+        /*
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        */
+
         //if house is empty become coordinator
         if (housesList.isEmpty())
             updateCoordinator(houseServer.getHouseBean(), 0);
@@ -78,8 +99,6 @@ public class House {
             updateCoordinator(houseServer.getHouseBean(), -1);
             sendHello(housesList);
         }
-
-
 
         //prompt user for remove or boost
         System.out.println("Insert \"exit\" to exit from the condo or \"boost\" to request a boost in usage:");
@@ -132,10 +151,12 @@ public class House {
             //should never happen
             e.printStackTrace();
         }
+        sms.stopMeGently();
+        statSender.interrupt();
     }
 
     //handle http response from restful web server. If abort is true the house is shotdown in case of an error status
-    private static void handleResponse(ClientResponse cr, boolean abort) {
+    static void handleResponse(ClientResponse cr, boolean abort) {
         if (cr.getStatus() != 200) {
             System.out.println("" + cr.getStatus() + " " + cr.getStatusInfo().getReasonPhrase() + ": " + cr.getEntity(String.class));
             if (abort)
@@ -146,18 +167,31 @@ public class House {
     static void updateCoordinator(HouseBean newCoord, int counter) {
         coordinatorLock.beginWrite();
         //if the coordinator is more recent or same counter but greater id
+        //after update if you become coordinator reset the statPkg
         if (coordinator == null) {
             coordinator = newCoord;
             coordinatorCounter = counter;
+            if (isCoordinator()) {
+                statCoordinator.reset();
+            }
         }
-        else if(counter > House.coordinatorCounter) {
+        else if(counter > coordinatorCounter) {
             coordinator = newCoord;
             coordinatorCounter = counter;
+            if (isCoordinator()) {
+                statCoordinator.reset();
+            }
         }
-        else if (counter == House.coordinatorCounter && newCoord.getId() > coordinator.getId()) {
+        else if (counter == coordinatorCounter && newCoord.getId() > coordinator.getId()) {
             coordinator = newCoord;
             coordinatorCounter = counter;
+            if (isCoordinator()) {
+                statCoordinator.reset();
+            }
         }
+
+
+
         coordinatorLock.endWrite();
     }
 
@@ -178,7 +212,8 @@ public class House {
         newElected = false;
         int counter = coordinatorCounter;
         coordinator = null;
-        //if the selected one doesn't respond select a new one and set it with higher priority
+        //if the selected one doesn't respond select another one (possibly the same) and set it with higher priority
+        //reload the condo table to get a fresh one in case new nodes inserted or removed.
         while (!newElected) {
             Hashtable<Integer, HouseBean> condo =  Condo.getInstance().getCondoTable();
             if (!condo.isEmpty()) {
@@ -207,6 +242,17 @@ public class House {
         dos.flush();
         dos.close();
         sendSocket.close();
+    }
+
+    static boolean isCoordinator() {
+        House.coordinatorLock.beginRead();
+        //if i'm the coordinator add it to the structure
+        boolean result = false;
+        if (coordinator != null && coordinator.getId() == houseServer.getHouseBean().getId())
+            result = true;
+
+        House.coordinatorLock.endRead();
+        return result;
     }
 
     private static void sendRemovalToServer(Client client) {
