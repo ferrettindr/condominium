@@ -14,6 +14,7 @@ public class RequestQueue {
     private ArrayList<Message> waitingQueue;
     //queue of nodes that has sent back OK
     private Hashtable<Integer,HouseBean> okQueue;
+    private Message localRequest;
     private volatile boolean usingResource = false;
     private volatile boolean waitingForResource = false;
 
@@ -24,7 +25,13 @@ public class RequestQueue {
         waitingForResource = false;
     }
 
-    //public void setOkQueue(Hashtable<Integer, HouseBean> okQueue) {this.okQueue = okQueue;}
+    public void setLocalRequest(Message msg) {
+        localRequest = msg;
+    }
+
+    public Message getLocalRequest() {
+        return localRequest;
+    }
 
     public  boolean isUsingResource() {
         return usingResource;

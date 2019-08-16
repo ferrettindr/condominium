@@ -253,9 +253,9 @@ public class House {
 
         for (int i = 1; i <= boosts.size(); i++) {
             boosts.get(i).resetOk();
-            //set myself in every queue as first
             boosts.get(i).resetWaiting();
-            boosts.get(i).addToWaiting(msg);
+            //set local request
+            boosts.get(i).setLocalRequest(msg);
             //send ok msg from myself to myself
             sendOkMessageToHouse(houseServer.getHouseBean(), i);
         }
