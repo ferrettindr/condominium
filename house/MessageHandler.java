@@ -43,16 +43,17 @@ public class MessageHandler implements Runnable {
             case "EMPTY":
                 break;
             case "BOOST_OK":
+                getStoppedLock();
                 try {
                     System.out.println("received boost ok from " + msg.getContent(HouseBean.class).getId() + " for boost " + msg.getParameters(Integer.class).get(0));
                     handleBoostOk(msg);}
                 catch (IOException e) {e.printStackTrace();}
                 catch (InterruptedException e) {e.printStackTrace();}
                 catch (JSONException e) {e.printStackTrace();}
+                releaseStoppedLock();
                 break;
             case "BOOST_REQUEST":
                 getStoppedLock();
-                System.out.println("Received boost request");
                 try {handleBoostRequest(msg);}
                 catch (IOException e) {e.printStackTrace();} catch (JSONException e) {
                     e.printStackTrace();
@@ -152,12 +153,14 @@ public class MessageHandler implements Runnable {
         House.boostLock.beginWrite();
 
         //remove from okQueue
-        House.boosts.get(getBoostNum).removeFromOk(sender.getId());
+        House.boosts.get(getBoostNum).addToOk(sender);
         //if atleast one resource is free it means that i already got the boost and freed that resource, therefore i don't need the ok message
         if (!(House.boosts.get(1).isResourceOccupied() && House.boosts.get(2).isResourceOccupied())) {}
-        //if i'm first in waiting queue and ok queue is empty
-        else if (House.boosts.get(getBoostNum).isOkEmpty() && House.boosts.get(getBoostNum).firstElementWaiting() == houseBean.getId()) {
+        //if i'm first in waiting queue and got ok from all the house in the condo
+        else if (House.boosts.get(getBoostNum).getOkSet().containsAll(Condo.getInstance().getCondoTable().keySet())
+                && House.boosts.get(getBoostNum).firstElementWaiting() == houseBean.getId()) {
             //free all the other boosts
+            System.out.println("Got the BOOST num: " + getBoostNum);
             for(int i = 0; i < freeBoostNum.size(); i++) {
                 //remove yourself from waiting queue
                 int freeBoost = freeBoostNum.get(i);
@@ -172,9 +175,9 @@ public class MessageHandler implements Runnable {
             House.boostLock.endWrite();
 
             //start boost
-            System.out.println("Got the BOOST num: " + getBoostNum);
             //TODO inform server you have the boost
             House.sms.boost();
+
 
             House.boostLock.beginWrite();
 
@@ -202,11 +205,17 @@ public class MessageHandler implements Runnable {
             }
             //if waiting on boost put in waiting queue in the correct order.
             //if timestamp < local request and requestId < localId  timestamp send ok to it
+            //if timestamps are equal use houseID to establish order. Lower id comes before
             else if (House.boosts.get(i).isWaitingForResource()) {
                 House.boosts.get(i).addToWaiting(msg);
                 long requestTs = msg.getTimestamp(long.class);
                 long localTs = House.boosts.get(i).getFromWaiting(houseBean.getId()).getTimestamp(long.class);
                 if (requestTs < localTs) {
+                    System.out.println("SHOULD NOT HAPPEN-----------------");
+                    sendOkMessageToHouse(msg.getContent(HouseBean.class), i);
+                }
+                else if (requestTs == localTs && msg.getContent(HouseBean.class).getId() < houseBean.getId()) {
+                    System.out.println("SHOULDE NOT BE HERE");
                     sendOkMessageToHouse(msg.getContent(HouseBean.class), i);
                 }
                 //if i'm the first request i get the boost if ok is empty
@@ -263,6 +272,8 @@ public class MessageHandler implements Runnable {
             helloAck.setHeader("ACK_HELLO");
         House.coordinatorLock.endRead();
 
+        //TODO send boost request to the newly added house if waiting for boost
+
         helloAck.setContent(houseBean);
         House.sendMessageToHouse(newHouse, helloAck);
         System.out.println("HELLO RESPONSE to id: " + newHouse.getId());
@@ -277,6 +288,7 @@ public class MessageHandler implements Runnable {
             House.updateCoordinator(hb, msg.getParameters(Integer.class).get(0));
             System.out.println("Acked by coordinator with ID: " + hb.getId() + " with counter: " + msg.getParameters(Integer.class).get(0));
         }
+        //TODO send boost request to the newly added house if waiting for boost
         System.out.println("HELLO ACK RESPONSE by id: " + hb.getId());
         System.out.println("Condo table: " + Condo.getInstance().getCondoTable().toString());
     }

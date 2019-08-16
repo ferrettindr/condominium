@@ -58,3 +58,9 @@ service provided by the administrator server:
     the problem when a house joins and there's only the coordinator, but the coordinator removes itself before it receives the hello and doesn't
     elect the new house. This is solved by having every house initialize itself as coordinator with counter -1. When another house will join
     the one with highest id will become coordinator. (Both hello and ack hello can elect coordinator).
+
+    STATS
+    stats are exchange between the houses as described in the document (sliding window and overlap). Only the coordinator cares about
+    the stats it receives. When it receives a stat it adds it to as the corresponding house stat. If all the houses in the condo have
+    the stat set it sends the statpkg to the server (calculates the condo usage) and reset all the stats. No stat from a house gets
+    used twice to calculate the condo usage. //TODO explain the stat sender and coordiantor stuff how it works

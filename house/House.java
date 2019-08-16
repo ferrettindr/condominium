@@ -145,6 +145,20 @@ public class House {
                 case "condo":
                     System.out.println("My condo is: " + Condo.getInstance().getCondoTable().toString());
                     break;
+                case "waiting":
+                    for (int i = 1; i<=boosts.size(); i++) {
+                        ArrayList<HouseBean> tmp = null;
+                        try {
+                            tmp = boosts.get(i).resetWaiting();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        String  str = "";
+                        for (HouseBean hb: tmp)
+                            str += " " + hb.getId();
+                        System.out.println("Waiting queue for boost: " + i + " waiting queue: " + str);
+                    }
+                    break;
                 default:
                     System.out.println("Unknown command");
             }
@@ -166,6 +180,7 @@ public class House {
         sendRemovalToNetwork(Condo.getInstance().getCondoTable());
         stoppedLock.endWrite();
 
+        //no need to check if executing boost because stopped sending stats
         boostLock.beginWrite();
         try {sendOkBoosts();} catch (IOException e) {e.printStackTrace();}
         boostLock.endWrite();
@@ -187,7 +202,7 @@ public class House {
 
     //send ok to all the elements in the waiting queue for each boost and reset it
     static private void sendOkBoosts() throws IOException {
-        for (int i = 1; i < boosts.size(); i++) {
+        for (int i = 1; i <= boosts.size(); i++) {
             //remove yourself so it doesn't send ok to yourself (message handler already shut down)
             boosts.get(i).removeFromWaiting(houseServer.getHouseBean().getId());
             sendOkMessageToCondo(i);
@@ -200,7 +215,12 @@ public class House {
         ok.setHeader("BOOST_OK");
         ok.setContent(houseServer.getHouseBean());
         ok.addParameter(boostIndex);
-        sendMessageToCondo(boosts.get(boostIndex).resetWaiting(), ok);
+        ArrayList<HouseBean> tmp = boosts.get(boostIndex).resetWaiting();
+        String  str = "";
+        for (HouseBean hb: tmp)
+            str += " " + hb.getId();
+        System.out.println("Freeing boost num: " + boostIndex + " waiting queue: " + str);
+        sendMessageToCondo(tmp, ok);
     }
 
     //handle http response from restful web server. If abort is true the house is shutdown in case of an error status
@@ -217,20 +237,10 @@ public class House {
         Message msg = new Message();
         msg.setHeader("BOOST_REQUEST");
 
-        //get timestamp of request
-        Calendar c = Calendar.getInstance();
-        c.set(Calendar.HOUR_OF_DAY, 0);
-        c.set(Calendar.MINUTE, 0);
-        c.set(Calendar.SECOND, 0);
-        c.set(Calendar.MILLISECOND, 0);
-        //append id to timestamp so there is a total order on the events
-        //TODO risk of having starvation due to appending the id (eg. 2 vs 34) 2 is always gonna be earlier
-        long timestamp = Long.parseLong(houseServer.getHouseBean().getId() + Long.toString(c.getTimeInMillis()));
-
         try {
             //ask for both boost
             msg.setContent(houseServer.getHouseBean());
-            msg.setTimestamp(timestamp);
+            msg.setTimestamp(System.currentTimeMillis());
         } catch (IOException e) {e.printStackTrace();}
 
         Hashtable<Integer, HouseBean> list = Condo.getInstance().getCondoTable();
@@ -249,7 +259,7 @@ public class House {
         }
         else {
             for (int i = 1; i <= boosts.size(); i++) {
-                boosts.get(i).setOkQueue(new Hashtable<>(list));
+                boosts.get(i).resetOk();
                 //set my self in every queue as first
                 boosts.get(i).resetWaiting();
                 boosts.get(i).addToWaiting(msg);
