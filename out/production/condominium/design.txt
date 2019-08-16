@@ -64,3 +64,14 @@ service provided by the administrator server:
     the stats it receives. When it receives a stat it adds it to as the corresponding house stat. If all the houses in the condo have
     the stat set it sends the statpkg to the server (calculates the condo usage) and reset all the stats. No stat from a house gets
     used twice to calculate the condo usage. //TODO explain the stat sender and coordiantor stuff how it works
+
+    BOOST
+    implement ricart and agrawala mutual exclusion. One queue for each boost (in this case 2). When a boost is requested put yourself
+    in the waiting queue and send ok from yourself to yourself.
+    When receive a boost request check for each boost:
+    - if you are not using or waiting for the resource send back an ok
+    - if you are using the resource  add the request to the waiting queue
+    - if you are waiting add the request to the waiting queue (ordered based on the timestamp of the request and the id of the node
+      in case of equal timestamp). If the received request has an earlier timestamp than yours send ok to it.
+    When receiving an OK add the sender to the ok queue and remove it form the waiting queue if present (unless it's the OK you sent
+    youself, you don't remove yourself). If the ok queue set contains the condo set and your request is first in the waiting queue

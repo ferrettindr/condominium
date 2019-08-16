@@ -12,7 +12,7 @@ public class RequestQueue {
 
     //queue of nodes that want the resource ordered by timestamp
     private ArrayList<Message> waitingQueue;
-    //queue of nodes that need to send back OK
+    //queue of nodes that has sent back OK
     private Hashtable<Integer,HouseBean> okQueue;
     private volatile boolean usingResource = false;
     private volatile boolean waitingForResource = false;

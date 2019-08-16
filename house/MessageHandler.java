@@ -145,11 +145,18 @@ public class MessageHandler implements Runnable {
 
         //remove from okQueue
         House.boosts.get(getBoostNum).addToOk(sender);
-        //if at least one resource is free it means that i already got the boost and freed that resource, therefore i don't need the ok message
-        if (!(House.boosts.get(1).isResourceOccupied() && House.boosts.get(2).isResourceOccupied())) {}
-        //if i'm first in waiting queue and got ok from all the house in the condo
-        else if (House.boosts.get(getBoostNum).getOkSet().containsAll(Condo.getInstance().getCondoTable().keySet())
-                && House.boosts.get(getBoostNum).firstElementWaiting() == houseBean.getId()) {
+        //if the sender is not yourself (don't want to remove yourself from the queue with ok)
+        if (sender.getId() != houseBean.getId()) {
+            //remove who sent ok from your waiting queue
+            House.boosts.get(getBoostNum).removeFromWaiting(sender.getId());
+        }
+        //if at least one resource is free it means that i already got the boost and will free all the resources, therefore i don't need the ok message
+        if (!(House.boosts.get(1).isResourceOccupied() && House.boosts.get(2).isResourceOccupied())) {
+            //do nothing
+        }
+        //if got ok from all the house in the condo
+        else if (House.boosts.get(getBoostNum).getOkSet().containsAll(Condo.getInstance().getCondoTable().keySet())) {
+                //&& House.boosts.get(getBoostNum).firstElementWaiting() == houseBean.getId()) {
             //free all the other boosts
             for(int i = 0; i < freeBoostNum.size(); i++) {
                 //remove yourself from waiting queue
@@ -174,11 +181,6 @@ public class MessageHandler implements Runnable {
             House.boosts.get(getBoostNum).freeResource();
             //send ok to everyone in this boost waiting queue
             House.sendOkMessageToCondo(getBoostNum);
-        }
-        //if the sender is not yourself (don't want to remove yourself from the queue with ok)
-        else if (sender.getId() != houseBean.getId()) {
-            //remove who sent ok from your waiting queue
-            House.boosts.get(getBoostNum).removeFromWaiting(sender.getId());
         }
         House.boostLock.endWrite();
     }

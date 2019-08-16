@@ -55,9 +55,7 @@ public class SmartMeterSimulator extends Simulator {
 
         boost = true;
 
-        System.out.println("got the boost from: " + System.currentTimeMillis());
-        sleep(10000);
-        System.out.println("to: " + System.currentTimeMillis());
+        sleep(5000);
 
         boost = false;
 
