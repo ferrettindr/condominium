@@ -135,7 +135,7 @@ public class House {
                         boosts.get(1).waitResource();
                         boosts.get(2).waitResource();
                         try {requestBoost();} catch (IOException e) {e.printStackTrace();}
-                        catch (InterruptedException e) {e.printStackTrace();}
+                        catch (InterruptedException | JSONException e) {e.printStackTrace();}
                     }
                     boostLock.endWrite();
                     break;
@@ -223,6 +223,14 @@ public class House {
         sendMessageToCondo(tmp, ok);
     }
 
+    static void sendOkMessageToHouse(HouseBean receiver, int boostIndex) throws IOException, JSONException {
+        Message resp = new Message();
+        resp.setHeader("BOOST_OK");
+        resp.setContent(houseServer.getHouseBean());
+        resp.addParameter(boostIndex);
+        House.sendMessageToHouse(receiver, resp);
+    }
+
     //handle http response from restful web server. If abort is true the house is shutdown in case of an error status
     static void handleResponse(ClientResponse cr, boolean abort) {
         if (cr.getStatus() != 200) {
@@ -233,7 +241,7 @@ public class House {
     }
 
     //send to all the condo (including yourself) the boost request
-    static void requestBoost() throws IOException, InterruptedException {
+    static void requestBoost() throws IOException, InterruptedException, JSONException {
         Message msg = new Message();
         msg.setHeader("BOOST_REQUEST");
 
@@ -243,33 +251,15 @@ public class House {
             msg.setTimestamp(System.currentTimeMillis());
         } catch (IOException e) {e.printStackTrace();}
 
-        Hashtable<Integer, HouseBean> list = Condo.getInstance().getCondoTable();
-        //TODO change okqueue. When receive a boostOK add the sender to your ok queue and check your okQueue vs the condo
-        //TODO if okQueue set is greater than condo set get the boost
-        //TODO even if condo is empty send request to yourself and if you get a request from youself and the condo is empty get the boost
-        //if ok list is empty i'm the only one and i can use the boost
-        if (list.isEmpty()) {
-            //TODO inform server you have the boost
-            //leave lock to allow yourself to handle boost requests from other nodes while you are using the boost
-            boostLock.endWrite();
-            sms.boost();
-            boostLock.beginWrite();
-            for (int i = 1; i <= boosts.size(); i++)
-                boosts.get(i).freeResource();
+        for (int i = 1; i <= boosts.size(); i++) {
+            boosts.get(i).resetOk();
+            //set myself in every queue as first
+            boosts.get(i).resetWaiting();
+            boosts.get(i).addToWaiting(msg);
+            //send ok msg from myself to myself
+            sendOkMessageToHouse(houseServer.getHouseBean(), i);
         }
-        else {
-            for (int i = 1; i <= boosts.size(); i++) {
-                boosts.get(i).resetOk();
-                //set my self in every queue as first
-                boosts.get(i).resetWaiting();
-                boosts.get(i).addToWaiting(msg);
-            }
-        }
-
-
-        //send message to yourself also so you can put yourself in the waiting queue
-        //list.put(houseServer.getHouseBean().getId(), houseServer.getHouseBean());
-        sendMessageToCondo(list.values(), msg);
+        sendMessageToCondo(Condo.getInstance().getCondoTable().values(), msg);
     }
 
     static void updateCoordinator(HouseBean newCoord, int counter) {

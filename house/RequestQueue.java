@@ -35,10 +35,12 @@ public class RequestQueue {
     }
 
     public void waitResource() {
+        usingResource = false;
         waitingForResource = true;
     }
 
     public void useResource() {
+        waitingForResource = false;
         usingResource = true;
     }
 
