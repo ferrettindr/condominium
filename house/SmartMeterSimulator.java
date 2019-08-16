@@ -53,7 +53,7 @@ public class SmartMeterSimulator extends Simulator {
 
         boost = true;
 
-        sleep(5000);
+        sleep(10000);
 
         boost = false;
 

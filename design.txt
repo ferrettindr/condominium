@@ -58,3 +58,7 @@ service provided by the administrator server:
     the problem when a house joins and there's only the coordinator, but the coordinator removes itself before it receives the hello and doesn't
     elect the new house. This is solved by having every house initialize itself as coordinator with counter -1. When another house will join
     the one with highest id will become coordinator. (Both hello and ack hello can elect coordinator).
+
+    STATS
+    stats are exchange between the houses as described in the document (sliding window and overlap). Only the coordinator cares about
+    the stats it receives. When it receives a stat if it's a full
