@@ -86,7 +86,7 @@ public class House {
         handleResponse(response, true);
 
         Hashtable<Integer, HouseBean> housesList = new Hashtable<>();
-        //server response with the other houses in the network
+        //server responds with the other houses in the network
         try {
             housesList = response.getEntity(new GenericType<Hashtable<Integer, HouseBean>>() {});
             housesList.remove(houseServer.getHouseBean().getId());

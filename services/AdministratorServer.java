@@ -74,7 +74,6 @@ public class AdministratorServer {
         return Response.ok().build();
     }
 
-    //TODO handle if there are no stats
     @Path("stats/{n}")
     @GET
     @Produces({"application/json"})
@@ -83,16 +82,17 @@ public class AdministratorServer {
         return Response.ok(stats).build();
     }
 
-    //TODO handle case if a nonexistant id is used or the house doesn't have any stat
     @Path("stats/house/{id}/{n}")
     @GET
     @Produces({"application/json"})
     public Response getHouseStatistics(@PathParam("id") int id,@PathParam("n") int n) {
+        //if the house is not present you can't send stats
+        if (!Condo.getInstance().getCondoTable().containsKey(id))
+            return Response.status(Response.Status.CONFLICT).entity("There is no house with ID: " +  id).build();
         List<StatBean> stats = Statistics.getInstance().getHouseStat(id, n);
         return Response.ok(stats).build();
     }
 
-    //TODO handle if there are no stats
     @Path("stats/analytics/{n}")
     @GET
     @Produces({"application/json"})
@@ -101,12 +101,13 @@ public class AdministratorServer {
         return Response.ok(calculateAnalytics(stats, n)).build();
     }
 
-    //TODO handle case if a nonexistant id is used or the house doesn't have any stat
     @Path("stats/analytics/house/{id}/{n}")
-    @POST
-    @Consumes({"application/json"})
+    @GET
     @Produces({"application/json"})
     public Response getHouseAnalytics(@PathParam("id") int id,@PathParam("n") int n) {
+        //if the house is not present you can't send stats
+        if (!Condo.getInstance().getCondoTable().containsKey(id))
+            return Response.status(Response.Status.CONFLICT).entity("There is no house with ID: " +  id).build();
         List<StatBean> stats = Statistics.getInstance().getHouseStat(id, n);
         return Response.ok(calculateAnalytics(stats, n)).build();
     }
@@ -140,6 +141,7 @@ public class AdministratorServer {
         try {
             Notifier.getIstance().removeObserver(type, obs);
         } catch (Exception e) {
+            e.printStackTrace();
             return Response.status(Response.Status.BAD_REQUEST).entity("Wrong unsubscription type requested.").build();
         }
         return Response.ok().build();
@@ -170,20 +172,5 @@ public class AdministratorServer {
             sum +=  Math.pow(stat.getValue(), 2);
         return sum;
     }
-
-    /*
-    //permette di prelevare con un determinato nome
-    @Path("get/{name}")
-    @GET
-    @Produces({"application/json", "application/xml"})
-    public Response getByName(@PathParam("name") String name){
-        User u = Users.getInstance().getByName(name);
-        if(u!=null)
-            return Response.ok(u).build();
-        else
-            return Response.status(Response.Status.NOT_FOUND).build();
-    }
-    */
-
 
 }

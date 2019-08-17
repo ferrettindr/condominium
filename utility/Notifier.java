@@ -19,11 +19,11 @@ public class Notifier {
     }
 
     private RWLock inLock;
-    private List<AdministratorBean> inObservers;
+    private ArrayList<AdministratorBean> inObservers;
     private RWLock outLock;
-    private List<AdministratorBean> outObservers;
+    private ArrayList<AdministratorBean> outObservers;
     private RWLock boostLock;
-    private List<AdministratorBean> boostObservers;
+    private ArrayList<AdministratorBean> boostObservers;
 
     private static Notifier instance = null;
 
@@ -47,19 +47,19 @@ public class Notifier {
         switch (type) {
             case IN:
                 inLock.beginWrite();
-                if (!inObservers.contains(obs))
+                if (!containsObserver(inObservers, obs))
                     inObservers.add(obs);
                 inLock.endWrite();
                 break;
             case OUT:
                 outLock.beginWrite();
-                if (!outObservers.contains(obs))
+                if (!containsObserver(outObservers, obs))
                     outObservers.add(obs);
                 outLock.endWrite();
                 break;
             case BOOST:
                 boostLock.beginWrite();
-                if (!boostObservers.contains(obs))
+                if (!containsObserver(boostObservers, obs))
                     boostObservers.add(obs);
                 boostLock.endWrite();
                 break;
@@ -72,24 +72,39 @@ public class Notifier {
         switch (type) {
             case IN:
                 inLock.beginWrite();
-                if (!inObservers.contains(obs))
+                if (inObservers.contains(obs))
                     inObservers.remove(obs);
                 inLock.endWrite();
                 break;
             case OUT:
                 outLock.beginWrite();
-                if (!outObservers.contains(obs))
+                if (outObservers.contains(obs))
                     outObservers.remove(obs);
                 outLock.endWrite();
                 break;
             case BOOST:
                 boostLock.beginWrite();
-                if (!boostObservers.contains(obs))
+                if (boostObservers.contains(obs))
                     boostObservers.remove(obs);
                 boostLock.endWrite();
                 break;
             default:
                 break;
+        }
+    }
+
+    private static boolean containsObserver(ArrayList<AdministratorBean> abl, AdministratorBean obs) {
+        for (AdministratorBean ab: abl) {
+            if (ab.getIp().equals(obs.getIp()) && ab.getPort() == obs.getPort())
+                return true;
+        }
+        return false;
+    }
+
+    private static void removeObserverFromList(ArrayList<AdministratorBean> abl, AdministratorBean obs) {
+        for (AdministratorBean ab: abl) {
+            if (ab.getIp().equals(obs.getIp()) && ab.getPort() == obs.getPort())
+                abl.remove(ab);
         }
     }
 

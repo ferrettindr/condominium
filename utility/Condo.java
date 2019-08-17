@@ -51,11 +51,6 @@ public class Condo {
         return result;
     }
 
-    //TODO synchronized or removed?
-    //public void setCondoTable(Hashtable<Integer, HouseBean> condoTable) {
-    //    this.condoTable = condoTable;
-    //}
-
     //add a house to the condo if not already present
     public boolean addHouse(HouseBean h){
         rwLock.beginWrite();
