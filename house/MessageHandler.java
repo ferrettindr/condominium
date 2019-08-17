@@ -7,6 +7,8 @@ import java.util.ArrayList;
 
 import beans.HouseBean;
 import beans.StatBean;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
 import org.codehaus.jettison.json.JSONException;
 import utility.Condo;
 import utility.Message;
@@ -166,8 +168,11 @@ public class MessageHandler implements Runnable {
             //release lock so that it's possible to add requests to waiting queue
             House.boostLock.endWrite();
 
+            //inform server you have the boost
+            WebResource resource = House.client.resource(House.webURL+"boost/");
+            resource.type("application/json").put(ClientResponse.class, houseBean);
+
             //start boost
-            //TODO inform server you have the boost
             House.sms.boost();
 
 

@@ -39,6 +39,7 @@ public class House {
 
     static HouseServer houseServer;
     static String webURL;
+    static Client client;
 
     static StatCoordinator statCoordinator;
     static StatSender statSender;
@@ -66,7 +67,7 @@ public class House {
         ClientConfig cc = new DefaultClientConfig();
         cc.getClasses().add(JacksonJsonProvider.class);
         //cc.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, true);
-        Client client = Client.create(cc);
+        client = Client.create(cc);
 
         //start potential coordinator before connecting to server
         statCoordinator = new StatCoordinator(client);
@@ -228,7 +229,7 @@ public class House {
         resp.setHeader("BOOST_OK");
         resp.setContent(houseServer.getHouseBean());
         resp.addParameter(boostIndex);
-        House.sendMessageToHouse(receiver, resp);
+        sendMessageToHouse(receiver, resp);
     }
 
     //handle http response from restful web server. If abort is true the house is shutdown in case of an error status

@@ -13,12 +13,6 @@ import java.util.List;
 @Path("condo")
 public class AdministratorServer {
 
-    //TODO change in a singleton class with 3 different lists
-    Notifier inNotifier = new Notifier(Notifier.PushType.IN);
-    Notifier outNotifier = new Notifier(Notifier.PushType.OUT);
-    Notifier spikeNotifier = new Notifier(Notifier.PushType.SPIKE);
-
-
     @GET
     @Produces({"application/json"})
     public Response getCondo(){
@@ -41,7 +35,7 @@ public class AdministratorServer {
         Response result;
         if (Condo.getInstance().addHouse(h)) {
             Statistics.getInstance().removeHouseStats(h.getId());
-            inNotifier.notify(h);
+            Notifier.getIstance().notify(Notifier.PushType.IN, h);
             result = Response.ok(Condo.getInstance().getCondoTable()).build();
         }
         else
@@ -64,7 +58,7 @@ public class AdministratorServer {
             result = Response.status(Response.Status.CONFLICT).entity("Could not remove the house. There is no house with ID: " +  id).build();
         }
         else {
-            outNotifier.notify(h);
+            Notifier.getIstance().notify(Notifier.PushType.OUT, h);
         }
 
         return result;
@@ -117,23 +111,24 @@ public class AdministratorServer {
         return Response.ok(calculateAnalytics(stats, n)).build();
     }
 
-    //TODO method that notify when there's a spike
+    //notify when there's a boost
+    @Path("boost")
+    @PUT
+    @Consumes({"application/json"})
+    public  Response boostAlert(HouseBean hb) {
+        System.out.println("got the boost: " + hb.getId());
+        Notifier.getIstance().notify(Notifier.PushType.BOOST, hb);
+        return Response.ok().build();
+    }
+
     @Path("sub/{action}")
     @POST
     @Consumes({"application/json"})
     public Response subNotification(@PathParam("action") Notifier.PushType type , AdministratorBean obs) {
-        switch(type) {
-            case IN:
-                inNotifier.addObserver(obs);
-                break;
-            case OUT:
-                outNotifier.addObserver(obs);
-                break;
-            case SPIKE:
-                spikeNotifier.addObserver(obs);
-                break;
-            default:
-                return Response.status(Response.Status.BAD_REQUEST).entity("Wrong subscription type requested.").build();
+        try {
+            Notifier.getIstance().addObserver(type, obs);
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Wrong subscription type requested.").build();
         }
         return Response.ok().build();
     }
@@ -142,18 +137,10 @@ public class AdministratorServer {
     @POST
     @Consumes({"application/json"})
     public Response unsubNotification(@PathParam("action") Notifier.PushType type , AdministratorBean obs) {
-        switch(type) {
-            case IN:
-                inNotifier.removeObserver(obs);
-                break;
-            case OUT:
-                outNotifier.removeObserver(obs);
-                break;
-            case SPIKE:
-                spikeNotifier.removeObserver(obs);
-                break;
-            default:
-                return Response.status(Response.Status.BAD_REQUEST).entity("Wrong unsubscription type requested.").build();
+        try {
+            Notifier.getIstance().removeObserver(type, obs);
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Wrong unsubscription type requested.").build();
         }
         return Response.ok().build();
     }
