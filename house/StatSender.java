@@ -6,7 +6,6 @@ import utility.Condo;
 import utility.Message;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Hashtable;
 
 public class StatSender extends Thread {

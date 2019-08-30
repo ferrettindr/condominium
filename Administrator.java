@@ -94,8 +94,11 @@ public class Administrator {
                             });
                             System.out.println("The last " + stat.size() + " stats of the house with id: " + command[1]);
                             for (StatBean sb : stat) {
-                                //TODO timestamp in human format
-                                System.out.println("Value: " + sb.getValue() + " Timestamp: " + sb.getTimestamp());
+                                long totSeconds = sb.getTimestamp()/1000;
+                                long s = totSeconds % 60;
+                                long m = (totSeconds / 60) % 60;
+                                long h = (totSeconds / (60*60)) % 60;
+                                System.out.println("Value: " + sb.getValue() + " Timestamp: " + String.format("%02d:%02d:%02d", h, m, s));
                             }
                         }
                     }
@@ -109,8 +112,11 @@ public class Administrator {
                             });
                             System.out.println("The last " + condoStat.size() + " stats of the condo:");
                             for (StatBean sb : condoStat) {
-                                //TODO timestamp in human format
-                                System.out.println("Value: " + sb.getValue() + " Timestamp: " + sb.getTimestamp());
+                                long totSeconds = sb.getTimestamp()/1000;
+                                long s = totSeconds % 60;
+                                long m = (totSeconds / 60) % 60;
+                                long h = (totSeconds / (60*60)) % 60;
+                                System.out.println("Value: " + sb.getValue() + " Timestamp: " + String.format("%02d:%02d:%02d", h, m, s));
                             }
                         }
                     }

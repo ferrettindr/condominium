@@ -58,8 +58,7 @@ public class MessageHandler implements Runnable {
                 break;
             case "STATS":
                 getStoppedLock();
-                //if is elected House.houseServer.getHouseBean()add it to statistics otherwise ignore. Do a function that checks if you are the coordinator
-                //if i'm the coordinator add it to the structure
+                //if is elected House.houseServer.getHouseBean()add it to statistics otherwise ignore.
                 if (House.isCoordinator()) {
                     try {
                         House.statCoordinator.addStat(msg.getContent(HouseBean.class), msg.getParameters(StatBean.class).get(0));
@@ -77,10 +76,9 @@ public class MessageHandler implements Runnable {
                 break;
             case "ACK_ELECTED":
                 // not in mutual exclusion to stopped because needs to receive the message after it's stopped
-                //TODO understand why it thorws illegalMonitorStateException
-                synchronized ((House.newElected)) {
+                synchronized ((House.electedMonitor)) {
                     House.newElected = true;
-                    //House.newElected.notify();
+                    House.electedMonitor.notify();
                 }
                 break;
             case "ACK_HELLO_COORDINATOR":

@@ -36,6 +36,7 @@ public class House {
     static int coordinatorCounter;
     static final RWLock coordinatorLock = new RWLock();
     static Boolean newElected;
+    static Object electedMonitor = new Object();
 
     static HouseServer houseServer;
     static String webURL;
@@ -294,7 +295,6 @@ public class House {
         coordinatorLock.endWrite();
     }
 
-    //TODO see if there's a better way for parallel sending and a way to wait for the ending of all the threads
     //send a message to all the houses in the list
     static ArrayList<Thread> sendMessageToCondo(Collection<HouseBean> housesList, Message msg) {
         ArrayList<Thread> threadList = new ArrayList<>();
@@ -328,8 +328,8 @@ public class House {
                 msg.addParameter(counter);
                 sendMessageToHouse(newCoordinator, msg);
             }
-            synchronized (newElected) {
-                newElected.wait(2000);
+            synchronized (electedMonitor) {
+                electedMonitor.wait(2000);
             }
         }
     }
