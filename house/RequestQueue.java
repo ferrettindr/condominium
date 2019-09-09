@@ -78,8 +78,8 @@ public class RequestQueue {
                 waitingQueue.add(i, msg);
                 return;
             }
-            //if timestamps are equal use houseID to establish total order (smaller id comes before)
-            else if (m.getParameters(long.class) == msg.getParameters(long.class))
+            //if timestamps are equal use houseID to establish total order (smaller id has priority)
+            else if (m.getTimestamp(long.class) == msg.getTimestamp(long.class))
                 if (m.getContent(HouseBean.class).getId() > msg.getContent(HouseBean.class).getId()) {
                     waitingQueue.add(i, msg);
                     return;
@@ -116,8 +116,11 @@ public class RequestQueue {
         }
     }
 
-    //remove an element from the okQueue
-    //public void removeFromOk(int houseId) {okQueue.remove(houseId);}
+    //return the maximum timestamp in the waitingQueue
+    public double maxTimestampWaiting() throws IOException {
+        Message msg = waitingQueue.get(waitingQueue.size()-1);
+        return msg.getTimestamp(long.class);
+    }
 
     public Integer firstElementWaiting() throws IOException {
         if (waitingQueue.isEmpty())
@@ -141,7 +144,5 @@ public class RequestQueue {
     public Set<Integer> getOkSet() {
         return okQueue.keySet();
     }
-
-    //public boolean isOkEmpty() {return okQueue.isEmpty();}
 
 }

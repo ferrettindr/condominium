@@ -187,6 +187,12 @@ public class MessageHandler implements Runnable {
     private void handleBoostRequest(Message msg) throws IOException, JSONException {
         House.boostLock.beginRead();
 
+        long requestTs = msg.getTimestamp(long.class);
+        House.timestampLock.beginWrite();
+        if (requestTs > House.maxRequestTimestamp)
+            House.maxRequestTimestamp = requestTs+1;
+        House.timestampLock.endWrite();
+
         //check every boost and send ok if available
         for (int i = 1; i<=House.boosts.size(); i++) {
             //if using boost add it to waiting queue
@@ -194,15 +200,15 @@ public class MessageHandler implements Runnable {
                 House.boosts.get(i).addToWaiting(msg);
             }
             //if waiting on boost put in waiting queue in the correct order.
-            //if timestamp < local request and requestId < localId  timestamp send ok to it
-            //if timestamps are equal use houseID to establish order. Lower id comes before
             else if (House.boosts.get(i).isWaitingForResource()) {
                 House.boosts.get(i).addToWaiting(msg);
-                long requestTs = msg.getTimestamp(long.class);
                 long localTs = House.boosts.get(i).getLocalRequest().getTimestamp(long.class);
+                //if request timestamp < local request send ok
                 if (requestTs < localTs) {
                     House.sendOkMessageToHouse(msg.getContent(HouseBean.class), i);
-                } else if (requestTs == localTs && msg.getContent(HouseBean.class).getId() < houseBean.getId()) {
+                }
+                //if timestamps are equal use houseID to establish order. Lower id comes has priority
+                else if (requestTs == localTs && msg.getContent(HouseBean.class).getId() < houseBean.getId()) {
                     House.sendOkMessageToHouse(msg.getContent(HouseBean.class), i);
                 }
             }

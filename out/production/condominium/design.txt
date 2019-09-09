@@ -45,40 +45,45 @@ service provided by the administrator server:
 
     ENTERING THE NETWORK
     when a house starts it sends every other houses in the condo (given by the server) a hello.
-    The other houses respond to the hello with a message. The houses adds to her local condo only the houses that responds to the hello.
-    If a house remove itself it stops receiving messages except for the ack elected.
+    The other houses, when they receive hello, add the sender the their condo and respond with a helloAck message.
+    The hello sender adds to its local condo only the houses that responds to the hello with the ack.
+    If a house remove itself it stops responding to messages except for the ack elected.
+    This way situations like: H1 enters, sends Hello to H2, H2 exits, H1 doesn't add H2 because it didn't respond with ack.
 
 
     ELECTION
     At the beginning the only house present is the coordinator. Every node that has itself as coordinator responds to hello saying it is the coordinator.
-    At removal the coordinator sends the house with the highest id in the condo a removal informing it it is the new coordinator.
+    At removal the coordinator sends the house with the highest id in its condo a removal informing it it is the new coordinator.
     The new coordinator sends msg to everyone saying it's the new coordinator. Associated a counter to the coordinator to resolve
     issue related to removal of a node after he is elected. When a node receives a new coordinator, it updates it if the counter is higher
-    than its, or if the counter is the same value it gets updated if the sender id is higher than the receiver. This way is handled
+    than its, or if the counter is the same value and the new coordinator id is higher than the current one. This way is handled
     the problem when a house joins and there's only the coordinator, but the coordinator removes itself before it receives the hello and doesn't
     elect the new house. This is solved by having every house initialize itself as coordinator with counter -1. When another house will join
     the one with highest id will become coordinator. (Both hello and ack hello can elect coordinator).
 
     STATS
-    stats are exchange between the houses as described in the document (sliding window and overlap). Only the coordinator cares about
+    stats are exchanged between the houses as described in the document (sliding window and overlap). Only the coordinator cares about
     the stats it receives. When it receives a stat it adds it to as the corresponding house stat. If all the houses in the condo have
     the stat set it sends the statpkg to the server (calculates the condo usage) and reset all the stats. No stat from a house gets
-    used twice to calculate the condo usage. //TODO explain the stat sender and coordiantor stuff how it works
-    Stats remain in the condo untill a new house with the same id enters the condo after the other left.
+    used twice to calculate the condo usage. If a house send another stat only the one with the most recent timestamp is retained.
+    Condo stats use the most recent timestamp of the housestat used for calculating it. This is done by StatCoordinator.
+    Stats for a house remain in the AdminServer untill a new house with the same id enters the condo after the other has left.
+    StatSender send stats for a single house periodically (waits for sliding windows to fill) to all the other houses in the condo.
+    Only the coordinator will use that stat.
 
     BOOST
     implement ricart and agrawala mutual exclusion. One queue for each boost (in this case 2). When a boost is requested put yourself
     in the local request of each resource and send ok from yourself to yourself and send the boost request to all the condo.
+    Use a simple version of Lamport clock, if system time is lower than the maximum request time use the latter as request time.
     When receive a boost request check for each boost:
     - if you are not using or waiting for the resource send back an ok
     - if you are using the resource  add the request to the waiting queue
     - if you are waiting add the request to the waiting queue (ordered based on the timestamp of the request and the id of the node
       in case of equal timestamp). If the received request has an earlier timestamp than yours send ok to it.
     When receiving an OK add the sender to the ok queue and remove it form the waiting queue if present. If you got OK from all the
-    condo for one boost you can get that boost. Before using the boost free the other boosts waiting queue  by sending OK to all
+    condo for one boost you can get that boost. Before using the boost free the other boosts waiting queues by sending OK to all
     the waiting nodes. After using the boost send OK to all the nodes waiting on that boost.
-    When a node enters the condo and sends you hello other than the hello ack send also a boost request to it if you are waiting on boost
+    When a node enters the condo and sends you hello in addition to the hello ack send also a boost request to it if you are waiting on boost
     so he can send you back OK. The same thing happens when receiving a hello ack, send boost request to the node who sent the ack for the same
     reason.
-    When a house removes itself sends OK to everyone in its waiting queue for each resource. No need to wait boost ending because ends the
-    stats sending process before that.
+    When a house removes itself sends OK to everyone in its waiting queue for each resource.

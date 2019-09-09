@@ -36,11 +36,14 @@ public class House {
     static int coordinatorCounter;
     static final RWLock coordinatorLock = new RWLock();
     static Boolean newElected;
-    static Object electedMonitor = new Object();
+    static final Object electedMonitor = new Object();
 
     static HouseServer houseServer;
     static String webURL;
     static Client client;
+
+    static long maxRequestTimestamp = 0;
+    static final RWLock timestampLock = new RWLock();
 
     static StatCoordinator statCoordinator;
     static StatSender statSender;
@@ -126,18 +129,22 @@ public class House {
             } catch (IOException e) {System.err.println(e.getMessage() + "Cannot read user input");}
             switch (command) {
                 case "exit":
-                    sendRemovalToServer(client);
-                    quit();
+                    if (boosts.get(1).isUsingResource() || boosts.get(2).isUsingResource())
+                        System.out.println("Boost in use. Wait for the boost to end before exiting.");
+                    else {
+                        sendRemovalToServer(client);
+                        quit();
+                    }
                     break;
                 case "boost":
                     boostLock.beginWrite();
-                    if (boosts.get(1).isResourceOccupied() || boosts.get(2).isUsingResource())
+                    if (boosts.get(1).isResourceOccupied() || boosts.get(2).isResourceOccupied())
                         System.out.println("Boost already requested.");
                     else {
                         boosts.get(1).waitResource();
                         boosts.get(2).waitResource();
                         try {requestBoost();} catch (IOException e) {e.printStackTrace();}
-                        catch (InterruptedException | JSONException e) {e.printStackTrace();}
+                        catch (JSONException e) {e.printStackTrace();}
                     }
                     boostLock.endWrite();
                     break;
@@ -218,9 +225,9 @@ public class House {
         ok.setContent(houseServer.getHouseBean());
         ok.addParameter(boostIndex);
         ArrayList<HouseBean> tmp = boosts.get(boostIndex).resetWaiting();
-        String  str = "";
+        StringBuilder str = new StringBuilder();
         for (HouseBean hb: tmp)
-            str += " " + hb.getId();
+            str.append(" ").append(hb.getId());
         System.out.println("Freeing boost num: " + boostIndex + " waiting queue: " + str);
         sendMessageToCondo(tmp, ok);
     }
@@ -243,14 +250,21 @@ public class House {
     }
 
     //send to all the condo (including yourself) the boost request
-    static void requestBoost() throws IOException, InterruptedException, JSONException {
+    private static void requestBoost() throws IOException, JSONException {
         Message msg = new Message();
         msg.setHeader("BOOST_REQUEST");
 
         try {
             //ask for both boost
             msg.setContent(houseServer.getHouseBean());
-            msg.setTimestamp(System.currentTimeMillis());
+            //simple Lamport clock check weather the max timestamp in the waitingQueue is higher than system time
+            double timestamp = System.currentTimeMillis();
+            timestampLock.beginRead();
+            if (timestamp > maxRequestTimestamp)
+                msg.setTimestamp(System.currentTimeMillis());
+            else
+                msg.setTimestamp(maxRequestTimestamp);
+            timestampLock.endRead();
         } catch (IOException e) {e.printStackTrace();}
 
         for (int i = 1; i <= boosts.size(); i++) {
