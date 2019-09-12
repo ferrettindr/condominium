@@ -267,7 +267,7 @@ public class MessageHandler implements Runnable {
 
         helloAck.setContent(houseBean);
         House.sendMessageToHouse(newHouse, helloAck);
-        System.out.println("HELLO RESPONSE to id: " + newHouse.getId());
+        //System.out.println("HELLO RESPONSE to id: " + newHouse.getId());
     }
 
     //add house that sent the ack to the local condo
@@ -287,8 +287,7 @@ public class MessageHandler implements Runnable {
             House.sendMessageToHouse(hb, boostRequest);
         }
         House.boostLock.endRead();
-        System.out.println("HELLO ACK RESPONSE by id: " + hb.getId());
-        System.out.println("Condo table: " + Condo.getInstance().getCondoTable().toString());
+        System.out.println("Updated condo: " + Condo.getInstance().getCondoTable().toString());
     }
 
     private void getStoppedLock() {

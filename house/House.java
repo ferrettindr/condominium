@@ -228,7 +228,7 @@ public class House {
         StringBuilder str = new StringBuilder();
         for (HouseBean hb: tmp)
             str.append(" ").append(hb.getId());
-        System.out.println("Freeing boost num: " + boostIndex + " waiting queue: " + str);
+        //System.out.println("Freeing boost num: " + boostIndex + " waiting queue: " + str);
         sendMessageToCondo(tmp, ok);
     }
 
