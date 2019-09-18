@@ -66,8 +66,8 @@ public class MessageHandler implements Runnable {
                 }
                 releaseStoppedLock();
                 break;
-                //send to everyone ack_hello_coordinator and to coordinator ack_elected
             case "ELECTED":
+                //send to everyone ack_hello_coordinator and to coordinator ack_elected
                 getStoppedLock();
                 System.out.println("I'm being elected");
                 try {handleElected(msg);}
@@ -143,13 +143,10 @@ public class MessageHandler implements Runnable {
     private void tryToGetBoost(int getBoostNum, ArrayList<Integer> freeBoostNum, HouseBean sender) throws IOException, InterruptedException, JSONException {
         House.boostLock.beginWrite();
 
-        //remove from okQueue
+        //add to okQueue
         House.boosts.get(getBoostNum).addToOk(sender);
-        //if the sender is not yourself (don't want to remove yourself from the queue with ok)
-        //if (sender.getId() != houseBean.getId()) {
-            //remove who sent ok from your waiting queue
-            House.boosts.get(getBoostNum).removeFromWaiting(sender.getId());
-        //}
+        //remove who sent ok from your waiting queue
+        House.boosts.get(getBoostNum).removeFromWaiting(sender.getId());
         //if at least one resource is free it means that i already got the boost and will free all the resources, therefore i don't need the ok message
         if (!(House.boosts.get(1).isResourceOccupied() && House.boosts.get(2).isResourceOccupied())) {
             //do nothing

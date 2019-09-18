@@ -4,21 +4,13 @@ import java.util.Hashtable;
 
 import beans.HouseBean;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement
-@XmlAccessorType (XmlAccessType.FIELD)
 public class Condo {
 
-    @XmlElement(name="condo")
     private Hashtable<Integer, HouseBean> condoTable;
     private static Condo instance = null;
     private RWLock rwLock;
 
-    public Condo() {
+    private Condo() {
         condoTable = new Hashtable<Integer, HouseBean>();
         rwLock = new RWLock();
     }

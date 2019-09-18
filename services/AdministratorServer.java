@@ -116,8 +116,7 @@ public class AdministratorServer {
     @Path("boost")
     @PUT
     @Consumes({"application/json"})
-    public  Response boostAlert(HouseBean hb) {
-        System.out.println("got the boost: " + hb.getId());
+    public Response boostAlert(HouseBean hb) {
         Notifier.getIstance().notify(Notifier.PushType.BOOST, hb);
         return Response.ok().build();
     }

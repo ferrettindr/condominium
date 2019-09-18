@@ -8,7 +8,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.List;
 
 public class Notifier {
 
@@ -46,22 +45,13 @@ public class Notifier {
     public void addObserver(PushType type, AdministratorBean obs) {
         switch (type) {
             case IN:
-                inLock.beginWrite();
-                if (!containsObserver(inObservers, obs))
-                    inObservers.add(obs);
-                inLock.endWrite();
+                addObserverToList(inObservers, inLock, obs);
                 break;
             case OUT:
-                outLock.beginWrite();
-                if (!containsObserver(outObservers, obs))
-                    outObservers.add(obs);
-                outLock.endWrite();
+                addObserverToList(outObservers, outLock, obs);
                 break;
             case BOOST:
-                boostLock.beginWrite();
-                if (!containsObserver(boostObservers, obs))
-                    boostObservers.add(obs);
-                boostLock.endWrite();
+                addObserverToList(boostObservers, boostLock, obs);
                 break;
             default:
                 break;
@@ -71,26 +61,31 @@ public class Notifier {
     public void removeObserver(PushType type, AdministratorBean obs) {
         switch (type) {
             case IN:
-                inLock.beginWrite();
-                if (inObservers.contains(obs))
-                    inObservers.remove(obs);
-                inLock.endWrite();
+                removeObserverFromList(inObservers, inLock, obs);
                 break;
             case OUT:
-                outLock.beginWrite();
-                if (outObservers.contains(obs))
-                    outObservers.remove(obs);
-                outLock.endWrite();
+                removeObserverFromList(outObservers, outLock, obs);
                 break;
             case BOOST:
-                boostLock.beginWrite();
-                if (boostObservers.contains(obs))
-                    boostObservers.remove(obs);
-                boostLock.endWrite();
+                removeObserverFromList(boostObservers, boostLock, obs);
                 break;
             default:
                 break;
         }
+    }
+
+    //add observer to the list if not already present
+    private void addObserverToList(ArrayList<AdministratorBean> abl, RWLock lock, AdministratorBean obs) {
+        lock.beginWrite();
+        if (!containsObserver(abl, obs))
+            abl.add(obs);
+        lock.endWrite();
+    }
+    private void removeObserverFromList(ArrayList<AdministratorBean> abl, RWLock lock, AdministratorBean obs) {
+        lock.beginWrite();
+        if (abl.contains(obs))
+            abl.remove(obs);
+        lock.endWrite();
     }
 
     private static boolean containsObserver(ArrayList<AdministratorBean> abl, AdministratorBean obs) {
@@ -99,13 +94,6 @@ public class Notifier {
                 return true;
         }
         return false;
-    }
-
-    private static void removeObserverFromList(ArrayList<AdministratorBean> abl, AdministratorBean obs) {
-        for (AdministratorBean ab: abl) {
-            if (ab.getIp().equals(obs.getIp()) && ab.getPort() == obs.getPort())
-                abl.remove(ab);
-        }
     }
 
     public void notify(PushType type, HouseBean hb) {

@@ -17,7 +17,6 @@ import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.List;
 
 public class Administrator {
 
@@ -31,6 +30,7 @@ public class Administrator {
         cc.getClasses().add(JacksonJsonProvider.class);
         Client client = Client.create(cc);
 
+        //server socket for notifications
         ServerSocket ss = null;
         int listenerServerPort = Integer.parseInt(args[2]);
         try {ss = new ServerSocket(listenerServerPort);}
@@ -183,7 +183,7 @@ public class Administrator {
         catch (IOException e) {e.printStackTrace();}
     }
 
-    static boolean isCorrectParameters(int parameters, int expectedParameters) {
+    private static boolean isCorrectParameters(int parameters, int expectedParameters) {
         if (parameters < expectedParameters) {
             System.out.println("Wrong number of parameters. Expected " + expectedParameters + " parameters.");
             return false;
@@ -191,7 +191,7 @@ public class Administrator {
         return true;
     }
 
-    static boolean isGoodResponse(ClientResponse cr) {
+    private static boolean isGoodResponse(ClientResponse cr) {
         if (cr.getStatus() != 200) {
             System.out.println("" + cr.getStatus() + " " + cr.getStatusInfo().getReasonPhrase() + ": " + cr.getEntity(String.class));
             return false;

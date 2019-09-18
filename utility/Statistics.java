@@ -4,27 +4,19 @@ import java.util.*;
 
 import beans.StatBean;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
-@XmlAccessorType (XmlAccessType.FIELD)
 public class Statistics {
 
     //server data structure for saving stats of all houses
 
-    @XmlElement(name="houseStat")
     private Hashtable<Integer, ArrayList<StatBean>> statsTable;
-    @XmlElement(name="condoStat")
     private ArrayList<StatBean> condoStats;
 
     private  static Statistics instance = null;
     public RWLock rwLock;
 
     //singleton
-    public Statistics() {
+    private Statistics() {
         statsTable = new Hashtable<Integer, ArrayList<StatBean>>();
         condoStats = new ArrayList<StatBean>();
         rwLock = new RWLock();

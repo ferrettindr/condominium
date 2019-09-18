@@ -25,43 +25,43 @@ public class RequestQueue {
         waitingForResource = false;
     }
 
-    public void setLocalRequest(Message msg) {
+    public synchronized void setLocalRequest(Message msg) {
         localRequest = msg;
     }
 
-    public Message getLocalRequest() {
+    public synchronized Message getLocalRequest() {
         return localRequest;
     }
 
-    public  boolean isUsingResource() {
+    public synchronized boolean isUsingResource() {
         return usingResource;
     }
 
-    public boolean isWaitingForResource() {
+    public synchronized boolean isWaitingForResource() {
         return waitingForResource;
     }
 
-    public void waitResource() {
+    public synchronized void waitResource() {
         usingResource = false;
         waitingForResource = true;
     }
 
-    public void useResource() {
+    public synchronized void useResource() {
         waitingForResource = false;
         usingResource = true;
     }
 
-    public void freeResource() {
+    public synchronized void freeResource() {
         waitingForResource = false;
         usingResource = false;
     }
 
-    public boolean isResourceOccupied() {
+    public synchronized boolean isResourceOccupied() {
         return waitingForResource || usingResource;
     }
 
     //resets the waiting queue and return list of houses in it
-    public ArrayList<HouseBean> resetWaiting() throws IOException {
+    public synchronized ArrayList<HouseBean> resetWaiting() throws IOException {
         ArrayList<HouseBean> res = new ArrayList<>();
         for (Message msg: waitingQueue) {
             res.add(msg.getContent(HouseBean.class));
@@ -71,7 +71,7 @@ public class RequestQueue {
     }
 
     //add a message in the correct order to waitingQueue. Lowest timestamp first
-    public void addToWaiting(Message msg) throws IOException {
+    public synchronized void addToWaiting(Message msg) throws IOException {
         int i = 0;
         for (Message m: waitingQueue) {
             if (m.getTimestamp(long.class) > msg.getTimestamp(long.class)) {
@@ -91,12 +91,12 @@ public class RequestQueue {
     }
 
     //remove the first message from the waitingQueue
-    public void removeFirstWaiting() {
+    public synchronized void removeFirstWaiting() {
         waitingQueue.remove(0);
     }
 
     //return the first message in the waiting queue with id = houseId
-    public Message getFromWaiting(int houseId) throws IOException {
+    public synchronized Message getFromWaiting(int houseId) throws IOException {
         for (Message m: waitingQueue) {
             if (m.getContent(HouseBean.class).getId() == houseId)
                 return m;
@@ -105,7 +105,7 @@ public class RequestQueue {
     }
 
     //remove the first occurrence of a message with id = houseId from waitingQueue
-    public void removeFromWaiting(int houseId) throws IOException {
+    public synchronized void removeFromWaiting(int houseId) throws IOException {
         int i = 0;
         for (Message m: waitingQueue) {
             if (m.getContent(HouseBean.class).getId() == houseId) {
@@ -117,12 +117,12 @@ public class RequestQueue {
     }
 
     //return the maximum timestamp in the waitingQueue
-    public double maxTimestampWaiting() throws IOException {
+    public synchronized double maxTimestampWaiting() throws IOException {
         Message msg = waitingQueue.get(waitingQueue.size()-1);
         return msg.getTimestamp(long.class);
     }
 
-    public Integer firstElementWaiting() throws IOException {
+    public synchronized Integer firstElementWaiting() throws IOException {
         if (waitingQueue.isEmpty())
             return null;
         else {
@@ -131,17 +131,17 @@ public class RequestQueue {
     }
 
     //adds and element to the okQueue
-    public void addToOk(HouseBean hb) {
+    public synchronized void addToOk(HouseBean hb) {
         okQueue.put(hb.getId(), hb);
     }
 
     //removes all elements form the okQueue
-    public void resetOk() {
+    public synchronized void resetOk() {
         okQueue.clear();
     }
 
     //returns a set containing the keys of the okQueue (houseID)
-    public Set<Integer> getOkSet() {
+    public synchronized Set<Integer> getOkSet() {
         return okQueue.keySet();
     }
 

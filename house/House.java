@@ -111,7 +111,7 @@ public class House {
         if (housesList.isEmpty())
             updateCoordinator(houseServer.getHouseBean(), 0);
         //otherwise send hello and set yourself as coordinator with less priority
-        //this is down in case of all the other houses in the list removing themselves before the hello is received
+        //this is done in case of all the other houses in the list removing themselves before the hello is received
         else {
             //send a hello msg to all the other houses in the network
             updateCoordinator(houseServer.getHouseBean(), -1);
@@ -176,14 +176,12 @@ public class House {
     }
 
     private static void quit() {
-        stoppedLock.beginWrite();
 
         if (isCoordinator() && !Condo.getInstance().getCondoTable().isEmpty()) {
             try {electNewCoordinator();}
-            catch (IOException e) {e.printStackTrace();}
-            catch (JSONException e) {e.printStackTrace();}
-            catch (InterruptedException e) {e.printStackTrace();}
+            catch (IOException | JSONException | InterruptedException e) {e.printStackTrace();}
         }
+        stoppedLock.beginWrite();
         stopped = true;
         System.out.println("sending removal to network");
         sendRemovalToNetwork(Condo.getInstance().getCondoTable());
@@ -304,8 +302,6 @@ public class House {
             }
         }
 
-
-
         coordinatorLock.endWrite();
     }
 
@@ -324,27 +320,31 @@ public class House {
     private static void electNewCoordinator() throws IOException, JSONException, InterruptedException {
         newElected = false;
         int counter = coordinatorCounter;
-        coordinator = null;
         //if the selected one doesn't respond select another one (possibly the same) and set it with higher priority
         //reload the condo table to get a fresh one in case new nodes inserted or removed.
         while (!newElected) {
             Hashtable<Integer, HouseBean> condo =  Condo.getInstance().getCondoTable();
             if (!condo.isEmpty()) {
                 int max = -1;
+                //get house with max id
                 for (Integer i : condo.keySet())
                     if (i >= max)
                         max = i;
                 HouseBean newCoordinator = condo.get(max);
+                //elect it
                 Message msg = new Message();
                 msg.setHeader("ELECTED");
                 msg.setContent(houseServer.getHouseBean());
                 counter += 1;
                 msg.addParameter(counter);
                 sendMessageToHouse(newCoordinator, msg);
+                //wait for the elected node to respond (catch response in messageHandler)
+                synchronized (electedMonitor) {
+                    electedMonitor.wait(2000);
+                }
             }
-            synchronized (electedMonitor) {
-                electedMonitor.wait(2000);
-            }
+            //if empty remove yourself
+            else newElected = true;
         }
     }
 

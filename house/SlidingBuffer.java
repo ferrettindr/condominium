@@ -22,7 +22,7 @@ public class SlidingBuffer implements Buffer {
         counter = 0;
     }
 
-    //add at the start (queue-like). When windowSize reached copy in output list and notify
+    //add at the start. When windowSize reached copy in output list and notify
     @Override
     public synchronized void addMeasurement(Measurement m) {
         inputList.add(0, m);

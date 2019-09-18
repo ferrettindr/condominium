@@ -56,10 +56,10 @@ service provided by the administrator server:
     At removal the coordinator sends the house with the highest id in its condo a removal informing it it is the new coordinator.
     The new coordinator sends msg to everyone saying it's the new coordinator. Associated a counter to the coordinator to resolve
     issue related to removal of a node after he is elected. When a node receives a new coordinator, it updates it if the counter is higher
-    than its, or if the counter is the same value and the new coordinator id is higher than the current one. This way is handled
+    than its, or if the counter is the same value and the new coordinator id is higher than the current one. This way it is handled
     the problem when a house joins and there's only the coordinator, but the coordinator removes itself before it receives the hello and doesn't
     elect the new house. This is solved by having every house initialize itself as coordinator with counter -1. When another house will join
-    the one with highest id will become coordinator. (Both hello and ack hello can elect coordinator).
+    the one with highest id will become coordinator. (ack hello can elect coordinator).
 
     STATS
     stats are exchanged between the houses as described in the document (sliding window and overlap). Only the coordinator cares about
